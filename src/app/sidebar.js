@@ -799,7 +799,7 @@ export default function Sidebar({ open, onMenuClick }) {
         const renderIcon = (menuName, depth, hasChildren) => {
             if (depth === 0) {
                 return (
-                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-medivardaan-teal to-medivardaan-blue text-white shadow-lg flex-shrink-0 group-hover:shadow-xl group-hover:scale-110 transition-shadow duration-200 group-hover:transition-transform duration-200">
+                    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-medivardaan-teal to-medivardaan-blue text-white shadow-lg flex-shrink-0 group-hover:shadow-xl group-hover:scale-110 transition-all duration-200">
                         {getMenuIcon(menuName)}
                     </div>
                 );
@@ -1032,7 +1032,7 @@ export default function Sidebar({ open, onMenuClick }) {
                 ) : (
                     <>
                         <Image
-                            src="/logo.png"
+                            src="/medivardaan-logo-transparent.png"
                             width={0}
                             height={0}
                             sizes="100vw"

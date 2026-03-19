@@ -683,9 +683,7 @@ export default function DashboardPage() {
                                 </TableBody>
                                 <TableFooter className=" border-black/40 dark:border-white/40">
                                     <TableRow>
-                                        <TableCell colSpan={3}>
-                                            Total
-                                        </TableCell>
+                                        <TableCell colSpan={3}>Total</TableCell>
                                         <TableCell className="text-right">
                                             ₹2.8L
                                         </TableCell>

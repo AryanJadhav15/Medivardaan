@@ -830,7 +830,7 @@ export default function Sidebar({ open, onMenuClick }) {
                     }}
                     className={cn(
                         "flex items-center gap-2 text-sm font-medium rounded-lg transition-all duration-150 group relative",
-                        "hover:shadow-sm dark:text-white dark:hover:bg-white/8",
+                        "hover:shadow-sm dark:text-white dark:hover:bg-white/15",
                         open
                             ? "py-2 px-2.5 justify-start"
                             : "py-1.5 px-3 justify-center",
@@ -888,7 +888,7 @@ export default function Sidebar({ open, onMenuClick }) {
                         <button
                             className={cn(
                                 "w-full flex items-center gap-2 text-left group relative rounded-lg transition-all duration-150",
-                                "hover:shadow-sm dark:text-white dark:hover:bg-white/8",
+                                "hover:shadow-sm dark:text-white dark:hover:bg-white/15",
                                 open
                                     ? "py-2 px-2.5 justify-start"
                                     : "py-1.5 px-3 justify-center",
@@ -1011,7 +1011,7 @@ export default function Sidebar({ open, onMenuClick }) {
                 {open ? (
                     <>
                         <Image
-                            src="/medivardaan-logo-transparent.png"
+                            src="/medivardaan-logo-transparent-2.png"
                             width={0}
                             height={0}
                             sizes="100vw"
@@ -1020,19 +1020,19 @@ export default function Sidebar({ open, onMenuClick }) {
                             className="object-fill dark:hidden"
                         />
                         <Image
-                            src="/medivardaan-logo-transparent.png"
+                            src="/medivardaan-logo-transparent-2.png"
                             width={0}
                             height={0}
                             sizes="100vw"
                             style={{ width: "110px", height: "95px" }}
                             alt="MediVardaan Logo"
-                            className="object-fill hidden dark:inline-block dark:brightness-0 dark:invert dark:overflow-y-hidden"
+                            className="object-fill hidden dark:inline-block dark:overflow-y-hidden dark:invert dark:brightness-0"
                         />
                     </>
                 ) : (
                     <>
                         <Image
-                            src="/medivardaan-logo-transparent.png"
+                            src="/medivardaan-logo-transparent-2.png"
                             width={0}
                             height={0}
                             sizes="100vw"
@@ -1041,7 +1041,7 @@ export default function Sidebar({ open, onMenuClick }) {
                             className="object-contain dark:hidden"
                         />
                         <Image
-                            src="/medivardaan-logo-transparent.png"
+                            src="/medivardaan-logo-transparent-2.png"
                             width={0}
                             height={0}
                             sizes="100vw"

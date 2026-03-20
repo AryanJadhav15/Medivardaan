@@ -266,7 +266,7 @@ export default function NewLeadPage() {
                          <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="h-8 w-8 text-gray-500 hover:text-blue-600 dark:text-white/60 dark:hover:text-blue-400"
                             onClick={() => router.push(`/enquiry/add-enquiry-form?mode=view&id=${lead.EnquiryID || lead.enquiryId || lead.enquiryID || lead.id || (lead.leadNo ? lead.leadNo.replace('E','') : '')}`)}
                             title="View"
                          >

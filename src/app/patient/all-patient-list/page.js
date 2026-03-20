@@ -235,7 +235,7 @@ export default function AllPatientListPage() {
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-2">
                               <button
-                                className="p-1.5 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-[#393053]/30 dark:hover:bg-[#443C68] text-blue-600 dark:text-white transition-colors"
+                                className="h-8 w-8 text-gray-500 hover:text-blue-600 dark:text-white/60 dark:hover:text-blue-400 transition-colors"
                                 title="View Details"
                               >
                                 <Eye className="w-4 h-4" />

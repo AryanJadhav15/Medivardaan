@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
     Table,
@@ -57,8 +57,29 @@ import { useUser } from "@/hooks/useUser";
 export default function DashboardPage() {
     const [region, setRegion] = useState("0");
     const [period, setPeriod] = useState("All");
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const router = useRouter(); // ✅ Initialize router
     const user = useUser();
+
+    // Detect dark mode by watching the 'dark' class on <html>
+    useEffect(() => {
+        const root = document.documentElement;
+        setIsDarkMode(root.classList.contains("dark"));
+        const observer = new MutationObserver(() => {
+            setIsDarkMode(root.classList.contains("dark"));
+        });
+        observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+        return () => observer.disconnect();
+    }, []);
+
+    // Chart colors: purple in dark mode, teal in light mode
+    const chartColor = isDarkMode ? "#9D8EC5" : "#4DB8AC";
+    const tooltipBg = isDarkMode ? "#18122B" : "#ffffff";
+    const tooltipBorder = isDarkMode ? "#635985" : "#d1d5db";
+    const tooltipText = isDarkMode ? "#ffffff" : "#111827";
+    const tooltipLabel = isDarkMode ? "#9D8EC5" : "#4DB8AC";
+    const axisTickColor = isDarkMode ? "#9ca3af" : "#4b5563";
+    const gridStroke = isDarkMode ? "#d4c3db" : "#c3d6db";
 
     let userDetails = user;
 
@@ -477,16 +498,35 @@ export default function DashboardPage() {
                                         height="100%"
                                     >
                                         <LineChart data={revenueGrowthData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="month" />
-                                            <YAxis />
-                                            <Tooltip />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
+                                            <XAxis
+                                                dataKey="month"
+                                                tick={{ fill: axisTickColor, fontSize: 12 }}
+                                                axisLine={{ stroke: gridStroke }}
+                                                tickLine={{ stroke: gridStroke }}
+                                            />
+                                            <YAxis
+                                                tick={{ fill: axisTickColor, fontSize: 12 }}
+                                                axisLine={{ stroke: gridStroke }}
+                                                tickLine={{ stroke: gridStroke }}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: tooltipBg,
+                                                    border: `1px solid ${tooltipBorder}`,
+                                                    borderRadius: "8px",
+                                                    color: tooltipText,
+                                                }}
+                                                labelStyle={{ color: tooltipLabel, fontWeight: 600 }}
+                                                itemStyle={{ color: tooltipText }}
+                                            />
                                             <Line
                                                 type="monotone"
                                                 dataKey="revenue"
-                                                stroke="var(--medivardaan-teal-light)"
-                                                strokeWidth={2}
-                                                dot={{ r: 4 }}
+                                                stroke={chartColor}
+                                                strokeWidth={2.5}
+                                                dot={{ r: 4, fill: chartColor, strokeWidth: 0 }}
+                                                activeDot={{ r: 6, fill: chartColor }}
                                             />
                                         </LineChart>
                                     </ResponsiveContainer>
@@ -560,13 +600,31 @@ export default function DashboardPage() {
                                         height="100%"
                                     >
                                         <BarChart data={inventorySummaryData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="name" />
-                                            <YAxis />
-                                            <Tooltip />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
+                                            <XAxis
+                                                dataKey="name"
+                                                tick={{ fill: axisTickColor, fontSize: 12 }}
+                                                axisLine={{ stroke: gridStroke }}
+                                                tickLine={{ stroke: gridStroke }}
+                                            />
+                                            <YAxis
+                                                tick={{ fill: axisTickColor, fontSize: 12 }}
+                                                axisLine={{ stroke: gridStroke }}
+                                                tickLine={{ stroke: gridStroke }}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: tooltipBg,
+                                                    border: `1px solid ${tooltipBorder}`,
+                                                    borderRadius: "8px",
+                                                    color: tooltipText,
+                                                }}
+                                                labelStyle={{ color: tooltipLabel, fontWeight: 600 }}
+                                                itemStyle={{ color: tooltipText }}
+                                            />
                                             <Bar
                                                 dataKey="value"
-                                                fill="var(--medivardaan-teal-light)"
+                                                fill={chartColor}
                                                 radius={[5, 5, 0, 0]}
                                             />
                                         </BarChart>

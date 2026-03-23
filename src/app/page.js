@@ -113,13 +113,21 @@ export default function LoginPage() {
                 <CardHeader className="space-y-4 pb-8">
                     <div className="flex flex-col items-center justify-center gap-4">
                         <div className="relative group">
-                            <div className="absolute -inset-2 bg-gradient-to-r from-medivardaan-teal to-medivardaan-blue rounded-full blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+                            <div className="absolute bg-gradient-to-r from-medivardaan-teal to-medivardaan-blue rounded-full blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
                             <Image
-                                src="/logo.png"
-                                width={100}
+                                src="/ortho-square-logo.png"
+                                width={150}
                                 height={100}
                                 alt="MediVardaan Logo"
-                                className="object-contain relative rounded-full ring-4 ring-white shadow-lg"
+                                className="relative object-fit rounded-2xl dark:hidden"
+                            />
+
+                            <Image
+                                src="/ortho-square-dark-logo.png"
+                                width={280}
+                                height={200}
+                                alt="MediVardaan Logo"
+                                className="hidden relative object-fit rounded-2xl dark:inline-block"
                             />
                         </div>
                         <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medivardaan-teal to-medivardaan-blue bg-clip-text text-transparent">

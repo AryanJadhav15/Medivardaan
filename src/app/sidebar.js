@@ -1005,43 +1005,43 @@ export default function Sidebar({ open, onMenuClick }) {
         {open ? (
           <>
             <Image
-              src="/medivardaan-logo-transparent-2.png"
+              src="/ortho-square-logo.png"
               width={0}
               height={0}
               sizes="100vw"
-              style={{ width: "110px", height: "95px" }}
-              alt="MediVardaan Logo"
+              style={{ width: "110px", height: "90px" }}
+              alt="OthroSquare Logo"
               className="object-fill dark:hidden"
             />
             <Image
-              src="/medivardaan-logo-transparent-2.png"
+              src="/ortho-square-dark-logo2.png"
               width={0}
               height={0}
               sizes="100vw"
-              style={{ width: "110px", height: "95px" }}
-              alt="MediVardaan Logo"
-              className="object-fill hidden dark:inline-block dark:overflow-y-hidden dark:invert dark:brightness-0"
+              style={{ width: "110px", height: "70px" }}
+              alt="OrthoSquare Logo"
+              className="object-fill hidden dark:inline-block mb-3"
             />
           </>
         ) : (
           <>
             <Image
-              src="/medivardaan-logo-transparent-2.png"
+              src="/ortho-square-logo.png"
               width={0}
               height={0}
               sizes="100vw"
               style={{ width: "auto", height: "65px" }}
-              alt="MediVardaan Logo"
+              alt="OrthoSquare Logo"
               className="object-contain dark:hidden"
             />
             <Image
-              src="/medivardaan-logo-transparent-2.png"
+              src="/ortho-square-dark-logo2.png"
               width={0}
               height={0}
               sizes="100vw"
-              style={{ width: "auto", height: "65px" }}
-              alt="MediVardaan Logo"
-              className="object-contain hidden dark:block dark:brightness-0 dark:invert dark:opacity-80"
+              style={{ width: "auto", height: "75px" }}
+              alt="OrthoSquare Logo"
+              className="object-contain hidden dark:block dark:opacity-80"
             />
           </>
         )}

@@ -16,6 +16,8 @@ import { getAppointments } from '@/api/appointments'
 import { Pagination } from '@/components/Pagination'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { TableWrapper } from "@/components/shared/TableWrapper";
+import { useClinics } from '@/hooks/useClinics'
+import { useDoctors } from '@/hooks/useDoctors'
 
 export default function AllAppointmentsListPage() {
   const [approvalFilter, setApprovalFilter] = useState('all') 
@@ -32,7 +34,11 @@ export default function AllAppointmentsListPage() {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10); 
+  const itemsPerPage = 10; 
+
+  // Master Data Hooks
+  const { data: clinics = [], isLoading: loadingClinics } = useClinics();
+  const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
 
   // Mock Data for Fallback
   const mockAppointments = [
@@ -90,7 +96,7 @@ export default function AllAppointmentsListPage() {
         setAppointments(mockAppointments);
       }
     } catch (err) {
-      console.error('Failed to fetch appointments, using mock data:', err);
+      console.warn('Failed to fetch appointments, using mock data:', err.message);
       // Fallback to mock data on error so page renders
       setAppointments(mockAppointments);
     } finally {
@@ -272,9 +278,17 @@ export default function AllAppointmentsListPage() {
                         </SelectTrigger>
                         <SelectContent>
                         <SelectItem value="all">All Clinics</SelectItem>
-                        <SelectItem value="panvel">Panvel</SelectItem>
-                        <SelectItem value="mumbai">Mumbai</SelectItem>
-                        <SelectItem value="pune">Pune</SelectItem>
+                        {loadingClinics ? (
+                            <SelectItem value="loading" disabled>Loading clinics...</SelectItem>
+                        ) : clinics.length > 0 ? (
+                            Array.from(new Map(clinics.map(c => [c.clinicName, c])).values()).map((c, index) => (
+                                <SelectItem key={`clinic-${c.clinicID || index}-${c.clinicName}`} value={c.clinicName.toLowerCase()}>
+                                    {c.clinicName}
+                                </SelectItem>
+                            ))
+                        ) : (
+                            <SelectItem value="no-data" disabled>No clinics available</SelectItem>
+                        )}
                         </SelectContent>
                     </Select>
                     </div>
@@ -286,8 +300,17 @@ export default function AllAppointmentsListPage() {
                         </SelectTrigger>
                         <SelectContent>
                         <SelectItem value="all">All Doctors</SelectItem>
-                        <SelectItem value="32">Dr. Kinnari Lade</SelectItem>
-                        <SelectItem value="33">Dr. Rajesh Kumar</SelectItem>
+                        {loadingDoctors ? (
+                            <SelectItem value="loading" disabled>Loading doctors...</SelectItem>
+                        ) : doctors.length > 0 ? (
+                            Array.from(new Map(doctors.map(d => [d.name, d])).values()).map((doc, index) => (
+                                <SelectItem key={`doc-${doc.doctorID || index}-${doc.name}`} value={String(doc.doctorID || doc.DoctorID)}>
+                                    {doc.name}
+                                </SelectItem>
+                            ))
+                        ) : (
+                            <SelectItem value="no-data" disabled>No doctors available</SelectItem>
+                        )}
                         </SelectContent>
                     </Select>
                     </div>
@@ -357,7 +380,7 @@ export default function AllAppointmentsListPage() {
 
                     <Button
                     onClick={handleSearch}
-                    className="h-10 bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 shadow-sm"
+                    className="h-10 bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8"
                     >
                     <Search className="w-4 h-4 mr-2" />
                     Search

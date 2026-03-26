@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Settings, FileSpreadsheet } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Settings, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +20,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getAppointmentsReport } from "@/api/appointments";
+import { useClinics } from "@/hooks/useClinics";
+import { useDoctors } from "@/hooks/useDoctors";
 
 export default function AppointmentsReportPage() {
   const [clinic, setClinic] = useState("");
@@ -32,20 +35,36 @@ export default function AppointmentsReportPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8; // Adjust as needed
 
-  // Mock data matching the image
-  const appointments = [
-    { id: 1, name: "test", mobile: "1234567890", clinic: "ADAJAN", doctor: "", date: "31-Oct-2026", time: "11:00 AM", bookedBy: "", status: "Approved", visitStatus: "Pending" },
-    { id: 2, name: "test", mobile: "1234567890", clinic: "ADAJAN", doctor: "", date: "31-Oct-2028", time: "11:00 AM", bookedBy: "PatientApp", status: "Approved", visitStatus: "Pending" },
-    { id: 3, name: "B. Nikhilesh", mobile: "8179294155", clinic: "LB NAGAR", doctor: "", date: "12-Jan-2026", time: "13:00 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 4, name: "", mobile: "9755530937", clinic: "Bhopal", doctor: "", date: "10-Jan-2026", time: "11:00 AM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 5, name: "Khushi Chavan", mobile: "8799991807", clinic: "Porvorim", doctor: "", date: "07-Jan-2026", time: "15:00 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 6, name: "Nazma", mobile: "9036701315", clinic: "Hoodi", doctor: "", date: "07-Jan-2026", time: "14:30 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 7, name: "Subhankar Mothay", mobile: "8371044099", clinic: "Porvorim", doctor: "", date: "07-Jan-2026", time: "14:00 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 8, name: "Naveen", mobile: "9319522726", clinic: "LAJPAT NAGAR", doctor: "", date: "04-Jan-2026", time: "11:00 AM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 9, name: "Aishwary Dubey", mobile: "9891056124", clinic: "Indore", doctor: "", date: "03-Jan-2026", time: "15:00 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 10, name: "Rajina", mobile: "9188303808", clinic: "Trivandrum", doctor: "", date: "03-Jan-2026", time: "13:00 PM", bookedBy: "", status: "Pending", visitStatus: "Pending" },
-    { id: 11, name: "John Doe", mobile: "1231231234", clinic: "Mumbai", doctor: "Dr. Smith", date: "02-Jan-2026", time: "10:00 AM", bookedBy: "Web", status: "Approved", visitStatus: "Completed" },
-  ];
+  // Master Data
+  const { data: clinics = [], isLoading: loadingClinics } = useClinics();
+
+  // Async Data Fetching
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await getAppointmentsReport();
+        setAppointments(response);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load appointments report.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+     fetchData();
+  }, []);
+
+  const handleSearch = () => {
+     setCurrentPage(1);
+     fetchData();
+  };
 
   // Filter Logic (Simple implementation)
   const filteredAppointments = appointments.filter(apt => {
@@ -79,8 +98,18 @@ export default function AppointmentsReportPage() {
               <SelectValue placeholder="--- Select Clinic ---" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="clinic1">Clinic 1</SelectItem>
-              <SelectItem value="clinic2">Clinic 2</SelectItem>
+              <SelectItem value="all">All Clinics</SelectItem>
+              {loadingClinics ? (
+                  <SelectItem value="loading" disabled>Loading clinics...</SelectItem>
+              ) : clinics.length > 0 ? (
+                  Array.from(new Map(clinics.map(c => [c.clinicName, c])).values()).map((c, index) => (
+                      <SelectItem key={`clinic-${c.clinicID || index}-${c.clinicName}`} value={c.clinicName}>
+                          {c.clinicName}
+                      </SelectItem>
+                  ))
+              ) : (
+                  <SelectItem value="no-data" disabled>No clinics available</SelectItem>
+              )}
             </SelectContent>
           </Select>
 
@@ -120,7 +149,7 @@ export default function AppointmentsReportPage() {
           />
 
           <div>
-            <Button className="bg-[#D35400] hover:bg-[#A04000] text-white px-8 font-medium shadow-sm transition-all w-full md:w-auto">
+            <Button onClick={handleSearch} className="bg-[#D35400] hover:bg-[#A04000] text-white px-8 font-medium shadow-sm transition-all w-full md:w-auto">
               Search
             </Button>
           </div>
@@ -145,7 +174,26 @@ export default function AppointmentsReportPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.map((item, index) => (
+            {isLoading ? (
+               <TableRow>
+                 <TableCell colSpan={10} className="text-center py-8">
+                   <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                   <p className="text-sm text-gray-500 mt-2">Loading appointments...</p>
+                 </TableCell>
+               </TableRow>
+            ) : error ? (
+               <TableRow>
+                 <TableCell colSpan={10} className="text-center py-8 text-red-500">
+                   {error}
+                 </TableCell>
+               </TableRow>
+            ) : currentItems.length === 0 ? (
+               <TableRow>
+                 <TableCell colSpan={10} className="text-center py-8 text-gray-500">
+                   No appointments found
+                 </TableCell>
+               </TableRow>
+            ) : currentItems.map((item, index) => (
               <TableRow key={item.id} >
                 <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
                 <TableCell className="dark:text-white/75">{item.name}</TableCell>

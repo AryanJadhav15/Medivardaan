@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSpreadsheet, Settings } from "lucide-react";
+import { FileSpreadsheet, Settings, Loader2 } from "lucide-react";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getBajajSchemeInvoices } from "@/api/invoices";
 
 export default function BajajSchemeInvoicePage() {
   const [filters, setFilters] = useState({
@@ -33,110 +34,38 @@ export default function BajajSchemeInvoicePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Mock Data
-  const [mockData, setMockData] = useState([
-    {
-      id: 1,
-      clinicName: "Secunderabad",
-      patientCode: "P113614",
-      patientName: "Nithin Javvaji",
-      invoiceNo: "TEL003352526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "72,450.00",
-      downpayment: "8,050.00",
-      approvedLoanAmount: "80,500.00",
-      schemeName: "10/1",
-    },
-    {
-      id: 2,
-      clinicName: "Secunderabad",
-      patientCode: "P113614",
-      patientName: "Nithin Javvaji",
-      invoiceNo: "TEL003342526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "31,050.00",
-      downpayment: "3,450.00",
-      approvedLoanAmount: "34,500.00",
-      schemeName: "10/1",
-    },
-    {
-      id: 3,
-      clinicName: "Pimpri",
-      patientCode: "P113241",
-      patientName: "virendra chavan",
-      invoiceNo: "MAH000832526",
-      paymentDate: "12-Dec-2025",
-      revenueAmount: "28,000.00",
-      downpayment: "8,297.00",
-      approvedLoanAmount: "36,297.00",
-      schemeName: "10/2",
-    },
-    {
-      id: 4,
-      clinicName: "Pimpri",
-      patientCode: "P113289",
-      patientName: "sonali kadam",
-      invoiceNo: "MAH000802526",
-      paymentDate: "10-Dec-2025",
-      revenueAmount: "40,000.00",
-      downpayment: "10,000.00",
-      approvedLoanAmount: "50,000.00",
-      schemeName: "10/2",
-    },
-    {
-      id: 5,
-      clinicName: "New Yelhanka",
-      patientCode: "P113783",
-      patientName: "P HARSHVARDHAN NAYAK",
-      invoiceNo: "KAR006242526",
-      paymentDate: "20-Dec-2025",
-      revenueAmount: "45,000.00",
-      downpayment: "5,000.00",
-      approvedLoanAmount: "50,000.00",
-      schemeName: "10/1",
-    },
-    {
-      id: 6,
-      clinicName: "New Yelhanka",
-      patientCode: "P113758",
-      patientName: "PARTHA Chakrabarti",
-      invoiceNo: "KAR005902526",
-      paymentDate: "20-Dec-2025",
-      revenueAmount: "1,17,000.00",
-      downpayment: "13,000.00",
-      approvedLoanAmount: "1,30,000.00",
-      schemeName: "10/1",
-    },
-    {
-      id: 7,
-      clinicName: "New Yelhanka",
-      patientCode: "P113758",
-      patientName: "PARTHA Chakrabarti",
-      invoiceNo: "KAR005902526",
-      paymentDate: "20-Dec-2025",
-      revenueAmount: "90,000.00",
-      downpayment: "10,000.00",
-      approvedLoanAmount: "1,00,000.00",
-      schemeName: "10/1",
-    },
-    {
-      id: 8,
-      clinicName: "Mysore",
-      patientCode: "P113390",
-      patientName: "NAGARATHNA S",
-      invoiceNo: "KAR001092526",
-      paymentDate: "12-Dec-2025",
-      revenueAmount: "54,000.00",
-      downpayment: "6,000.00",
-      approvedLoanAmount: "60,000.00",
-      schemeName: "10/1",
-    },
-     // Adding more mock data to demonstrate pagination if needed
-     { id: 9, clinicName: "Ambernath", patientCode: "P113888", patientName: "Rahul Dravid", invoiceNo: "AMB001", paymentDate: "22-Dec-2025", revenueAmount: "10,000.00", downpayment: "1,000.00", approvedLoanAmount: "11,000.00", schemeName: "10/1"},
-     { id: 10, clinicName: "Ambernath", patientCode: "P113999", patientName: "Sachin T", invoiceNo: "AMB002", paymentDate: "22-Dec-2025", revenueAmount: "20,000.00", downpayment: "2,000.00", approvedLoanAmount: "22,000.00", schemeName: "10/1"},
-     { id: 11, clinicName: "Ambernath", patientCode: "P114000", patientName: "Virat K", invoiceNo: "AMB003", paymentDate: "23-Dec-2025", revenueAmount: "15,000.00", downpayment: "1,500.00", approvedLoanAmount: "16,500.00", schemeName: "10/2"},
-  ]);
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchData = async (currentFilters = filters) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await getBajajSchemeInvoices(currentFilters);
+        // Temporary client-side filtering until real backend handles it
+        const filtered = response.filter((item) => {
+            const matchClinic = !currentFilters.clinicName || item.clinicName.toLowerCase().includes(currentFilters.clinicName.toLowerCase());
+            const matchInvoice = !currentFilters.invoiceNo || item.invoiceNo.toLowerCase().includes(currentFilters.invoiceNo.toLowerCase());
+            return matchClinic && matchInvoice;
+        });
+        setData(filtered);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load invoice data.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, []);
+
+  const handleSearch = () => {
+      setCurrentPage(1);
+      fetchData();
+  };
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({
@@ -146,21 +75,19 @@ export default function BajajSchemeInvoicePage() {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const emptyFilters = {
       clinicName: "",
       invoiceNo: "",
       fromDate: "",
       toDate: "",
-    });
+    };
+    setFilters(emptyFilters);
+    setCurrentPage(1);
+    fetchData(emptyFilters);
   };
 
-  // Filter Data
-  const filteredData = mockData.filter((item) => {
-      const matchClinic = !filters.clinicName || item.clinicName.toLowerCase().includes(filters.clinicName.toLowerCase());
-      const matchInvoice = !filters.invoiceNo || item.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase());
-      // Date logic would go here if dates were standard objects
-      return matchClinic && matchInvoice;
-  });
+  // filteredData is now simply data because filtering is done during fetch
+  const filteredData = data;
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -237,6 +164,7 @@ export default function BajajSchemeInvoicePage() {
         <div className="md:col-span-3 flex gap-2">
           <Button
             size="sm"
+            onClick={handleSearch}
             className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-6 h-9 rounded-md"
           >
             Search
@@ -275,7 +203,20 @@ export default function BajajSchemeInvoicePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentItems.map((row, index) => (
+              {isLoading ? (
+                  <TableRow>
+                     <TableCell colSpan={10} className="text-center py-8">
+                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                       <p className="text-sm text-gray-500 mt-2">Loading invoices...</p>
+                     </TableCell>
+                  </TableRow>
+              ) : error ? (
+                  <TableRow>
+                     <TableCell colSpan={10} className="text-center py-8 text-red-500">
+                       {error}
+                     </TableCell>
+                  </TableRow>
+              ) : currentItems.map((row, index) => (
                 <TableRow key={row.id} className="text-xs">
                   <TableCell className="py-2 text-gray-600 dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
                   <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.clinicName}</TableCell>
@@ -289,7 +230,7 @@ export default function BajajSchemeInvoicePage() {
                   <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.schemeName}</TableCell>
                 </TableRow>
               ))}
-               {currentItems.length === 0 && (
+               {!isLoading && currentItems.length === 0 && (
                   <TableRow>
                      <TableCell colSpan={10} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
                   </TableRow>

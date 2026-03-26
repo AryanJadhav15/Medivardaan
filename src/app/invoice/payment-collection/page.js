@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Settings, CreditCard } from "lucide-react";
+import { Calendar as CalendarIcon, Settings, CreditCard, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useClinics } from "@/hooks/useClinics";
+import { useDoctors } from "@/hooks/useDoctors";
+import { submitPaymentCollection } from "@/api/invoices";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,10 +31,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function PaymentCollectionPage() {
   const [date, setDate] = useState(new Date());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock data for dropdowns
-  const clinics = ["Vardaan Clinic", "City Care", "Health Plus"];
-  const doctors = ["Dr. Sharma", "Dr. Gupta", "Dr. Lee"];
+  // Real data hooks
+  const { data: clinics = [], isLoading: loadingClinics } = useClinics();
+  const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
   const paymentModes = ["Cash", "Card", "UPI", "Net Banking"];
 
   // State for form fields
@@ -59,6 +64,33 @@ export default function PaymentCollectionPage() {
     }));
   };
 
+  // Automatically calculate Totals
+  useEffect(() => {
+    const cost = parseFloat(formData.totalCost) || 0;
+    const discount = parseFloat(formData.totalDiscount) || 0;
+    const tax = parseFloat(formData.totalTax) || 0;
+    const gTotal = cost - discount + tax;
+
+    const paid = parseFloat(formData.paidAmount) || 0;
+    const pay = parseFloat(formData.payAmount) || 0;
+    const pending = gTotal - paid - pay;
+
+    setFormData((prev) => {
+        // Prevent infinite re-renders by only triggering state update if the values actually mutated
+        if (
+            prev.grandTotal !== gTotal.toFixed(2) ||
+            prev.pendingAmount !== pending.toFixed(2)
+        ) {
+            return {
+                ...prev,
+                grandTotal: gTotal.toFixed(2),
+                pendingAmount: pending.toFixed(2),
+            };
+        }
+        return prev;
+    });
+  }, [formData.totalCost, formData.totalDiscount, formData.totalTax, formData.paidAmount, formData.payAmount]);
+
   const handleSelectChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -66,10 +98,34 @@ export default function PaymentCollectionPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", { ...formData, paymentDate: date });
-    // Add submission logic here
+    
+    // Basic validation
+    if (!formData.patientName || !formData.clinicName || !formData.doctorName || !formData.paidAmount) {
+      toast.error("Please fill in all required fields (Patient, Clinic, Doctor, Paid Amount)");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+        const payload = { ...formData, paymentDate: date };
+        await submitPaymentCollection(payload);
+        toast.success("Payment collected successfully!");
+        
+        // Reset form
+        setFormData({
+          patientName: "", clinicName: "", doctorName: "", paidAmount: "",
+          isMembership: false, totalCost: "", totalDiscount: "", totalTax: "",
+          grandTotal: "", paymentType: "finance", isCreditNote: false, payAmount: "",
+          pendingAmount: "", paymentMode: ""
+        });
+        setDate(new Date());
+    } catch (err) {
+        toast.error("Failed to submit payment collection");
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,11 +171,17 @@ export default function PaymentCollectionPage() {
                         <SelectValue placeholder="Select Clinic" />
                     </SelectTrigger>
                     <SelectContent>
-                        {clinics.map((clinic) => (
-                        <SelectItem key={clinic} value={clinic}>
-                            {clinic}
-                        </SelectItem>
-                        ))}
+                        {loadingClinics ? (
+                            <SelectItem value="loading" disabled>Loading clinics...</SelectItem>
+                        ) : clinics.length > 0 ? (
+                            Array.from(new Map(clinics.map(c => [c.clinicName, c])).values()).map((clinic, index) => (
+                                <SelectItem key={`clinic-${clinic.clinicID || index}-${clinic.clinicName}`} value={clinic.clinicName}>
+                                    {clinic.clinicName}
+                                </SelectItem>
+                            ))
+                        ) : (
+                            <SelectItem value="no-data" disabled>No clinics available</SelectItem>
+                        )}
                     </SelectContent>
                     </Select>
                 </div>
@@ -136,11 +198,17 @@ export default function PaymentCollectionPage() {
                         <SelectValue placeholder="Select Doctor" />
                     </SelectTrigger>
                     <SelectContent>
-                        {doctors.map((doc) => (
-                        <SelectItem key={doc} value={doc}>
-                            {doc}
-                        </SelectItem>
-                        ))}
+                        {loadingDoctors ? (
+                            <SelectItem value="loading" disabled>Loading doctors...</SelectItem>
+                        ) : doctors.length > 0 ? (
+                            Array.from(new Map(doctors.map(d => [d.name, d])).values()).map((doc, index) => (
+                                <SelectItem key={`doc-${doc.doctorID || index}-${doc.name}`} value={doc.name}>
+                                    {doc.name}
+                                </SelectItem>
+                            ))
+                        ) : (
+                            <SelectItem value="no-data" disabled>No doctors available</SelectItem>
+                        )}
                     </SelectContent>
                     </Select>
                 </div>
@@ -267,9 +335,10 @@ export default function PaymentCollectionPage() {
                         name="grandTotal"
                         type="number"
                         placeholder="0.00"
-                        className="font-bold border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                        className="font-bold border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 cursor-not-allowed"
                         value={formData.grandTotal}
                         onChange={handleInputChange}
+                        readOnly
                         />
                     </div>
                 </div>
@@ -375,9 +444,10 @@ export default function PaymentCollectionPage() {
         <div className="flex justify-center gap-4 pt-6">
           <Button
             type="submit"
-            className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors min-w-[150px] font-bold shadow-md"
+            disabled={isSubmitting}
+            className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-md transition-colors min-w-[150px] font-bold"
           >
-            Submit Payment
+            {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Payment"}
           </Button>
           <Button
             type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getOnlinePaymentInvoices } from "@/api/invoices";
 
 export default function OnlinePaymentInvoicePage() {
   const [filters, setFilters] = useState({
@@ -33,130 +34,38 @@ export default function OnlinePaymentInvoicePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Mock Data matching the screenshot
-  const [mockData, setMockData] = useState([
-    {
-      id: 1,
-      clinicName: "Dehradun",
-      patientCode: "P113607",
-      patientName: "shubhashish bhatt",
-      invoiceNo: "UTP003142526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "500.00",
-      paymentMode: "UPI",
-      transactionNo: "115661718611",
-    },
-    {
-      id: 2,
-      clinicName: "Dehradun",
-      patientCode: "P113604",
-      patientName: "rakesh agarwal",
-      invoiceNo: "UTP003112526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "2,500.00",
-      paymentMode: "UPI",
-      transactionNo: "115661718611",
-    },
-    {
-      id: 3,
-      clinicName: "LB NAGAR",
-      patientCode: "P113613",
-      patientName: "C Vijaya Bhaskar",
-      invoiceNo: "TEL003262526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "5,000.00",
-      paymentMode: "UPI",
-      transactionNo: "12512171147195511932202",
-    },
-     {
-      id: 4,
-      clinicName: "LB NAGAR",
-      patientCode: "P113613",
-      patientName: "C Vijaya Bhaskar",
-      invoiceNo: "TEL003262526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "5,000.00",
-      paymentMode: "UPI",
-      transactionNo: "12512171147195511932202",
-    },
-     {
-      id: 5,
-      clinicName: "MADHAPUR",
-      patientCode: "P113577",
-      patientName: "vijay kumar I",
-      invoiceNo: "TEL002312526",
-      paymentDate: "16-Dec-2025",
-      revenueAmount: "3,000.00",
-      paymentMode: "UPI",
-      transactionNo: "571619951287",
-    },
-    {
-      id: 6,
-      clinicName: "MAMBALAM",
-      patientCode: "P113679",
-      patientName: "Uma gopalkrishnan G",
-      invoiceNo: "TAN004452526",
-      paymentDate: "18-Dec-2025",
-      revenueAmount: "40,000.00",
-      paymentMode: "UPI",
-      transactionNo: "553369234255",
-    },
-     {
-      id: 7,
-      clinicName: "ADYAR",
-      patientCode: "P113609",
-      patientName: "ravi shankar",
-      invoiceNo: "TAN003222526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "2,500.00",
-      paymentMode: "UPI",
-      transactionNo: "571788390677",
-    },
-     {
-      id: 8,
-      clinicName: "TRICHY",
-      patientCode: "P113595",
-      patientName: "Marri S",
-      invoiceNo: "TAN002982526",
-      paymentDate: "17-Dec-2025",
-      revenueAmount: "25,000.00",
-      paymentMode: "UPI",
-      transactionNo: "195122365490",
-    },
-    {
-      id: 9,
-      clinicName: "ADYAR",
-      patientCode: "P113521",
-      patientName: "pughal ady",
-      invoiceNo: "TAN001592526",
-      paymentDate: "15-Dec-2025",
-      revenueAmount: "2,000.00",
-      paymentMode: "UPI",
-      transactionNo: "534938066745",
-    },
-    {
-      id: 10,
-      clinicName: "ADYAR",
-      patientCode: "P105305",
-      patientName: "sindhu k adyar",
-      invoiceNo: "TAN000832526",
-      paymentDate: "11-Dec-2025",
-      revenueAmount: "101.00",
-      paymentMode: "UPI",
-      transactionNo: "570918396580",
-    },
-    {
-        id: 11,
-        clinicName: "ADYAR",
-        patientCode: "P105306",
-        patientName: "Another Patient",
-        invoiceNo: "TAN000832527",
-        paymentDate: "11-Dec-2025",
-        revenueAmount: "100.00",
-        paymentMode: "UPI",
-        transactionNo: "570918396581",
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async (currentFilters = filters) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await getOnlinePaymentInvoices(currentFilters);
+        // Temporary client-side filtering until real backend handles it
+        const filtered = response.filter((item) => {
+            const matchClinic = !currentFilters.clinicName || item.clinicName.toLowerCase().includes(currentFilters.clinicName.toLowerCase());
+            const matchInvoice = !currentFilters.invoiceNo || item.invoiceNo.toLowerCase().includes(currentFilters.invoiceNo.toLowerCase());
+            return matchClinic && matchInvoice;
+        });
+        setData(filtered);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load invoice data.");
+    } finally {
+        setIsLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, []);
+
+  const handleSearch = () => {
+      setCurrentPage(1);
+      fetchData();
+  };
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({
@@ -166,20 +75,19 @@ export default function OnlinePaymentInvoicePage() {
   };
 
   const handleClear = () => {
-    setFilters({
+    const emptyFilters = {
       clinicName: "",
       invoiceNo: "",
       fromDate: "",
       toDate: "",
-    });
+    };
+    setFilters(emptyFilters);
+    setCurrentPage(1);
+    fetchData(emptyFilters);
   };
 
-  // Filter Data
-  const filteredData = mockData.filter((item) => {
-      const matchClinic = !filters.clinicName || item.clinicName.toLowerCase().includes(filters.clinicName.toLowerCase());
-      const matchInvoice = !filters.invoiceNo || item.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase());
-      return matchClinic && matchInvoice;
-  });
+  // filteredData is now simply data because filtering is done during fetch
+  const filteredData = data;
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -256,6 +164,7 @@ export default function OnlinePaymentInvoicePage() {
         <div className="md:col-span-3 flex gap-2">
             <Button
                 size="sm"
+                onClick={handleSearch}
                 className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-6 h-9 rounded-md"
             >
                 Search
@@ -293,7 +202,20 @@ export default function OnlinePaymentInvoicePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentItems.map((row, index) => (
+                {isLoading ? (
+                  <TableRow>
+                     <TableCell colSpan={9} className="text-center py-8">
+                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                       <p className="text-sm text-gray-500 mt-2">Loading invoices...</p>
+                     </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                     <TableCell colSpan={9} className="text-center py-8 text-red-500">
+                       {error}
+                     </TableCell>
+                  </TableRow>
+                ) : currentItems.map((row, index) => (
                     <TableRow key={row.id} className="text-xs">
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
                       <TableCell className="py-2 text-gray-600 dark:text-white/75 uppercase">{row.clinicName}</TableCell>
@@ -306,7 +228,7 @@ export default function OnlinePaymentInvoicePage() {
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.transactionNo}</TableCell>
                     </TableRow>
                 ))}
-                 {currentItems.length === 0 && (
+                 {!isLoading && currentItems.length === 0 && (
                   <TableRow>
                      <TableCell colSpan={9} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
                   </TableRow>

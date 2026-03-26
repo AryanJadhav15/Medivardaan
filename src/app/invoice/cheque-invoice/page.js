@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSpreadsheet, Settings } from "lucide-react";
+import { FileSpreadsheet, Settings, Loader2 } from "lucide-react";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getChequeInvoices } from "@/api/invoices";
 
 export default function ChequeInvoicePage() {
   const [filters, setFilters] = useState({
@@ -25,19 +26,37 @@ export default function ChequeInvoicePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Mock data
-  const [mockData, setMockData] = useState([
-    { id: 1, invoiceNo: "INV173797", clinic: "Borivali", patient: "BHARAT JOSHI", bank: "Central Bank of India", branch: "DAHISAR", ifsc: "CBIN0282739", chequeNo: "771176", date: "30-Dec-2026", amount: "20000.00", clearDate: "", status: "Pending" },
-    { id: 2, invoiceNo: "INV173797", clinic: "Borivali", patient: "BHARAT JOSHI", bank: "Central Bank of India", branch: "DAHISAR", ifsc: "CBIN0282739", chequeNo: "771179", date: "03-Mar-2026", amount: "20000.00", clearDate: "", status: "Pending" },
-    { id: 3, invoiceNo: "INV173797", clinic: "Borivali", patient: "BHARAT JOSHI", bank: "Central Bank of India", branch: "DAHISAR", ifsc: "CBIN0282739", chequeNo: "771175", date: "30-Dec-2025", amount: "20000.00", clearDate: "", status: "Pending" },
-    { id: 4, invoiceNo: "INV191123", clinic: "KALYAN NAGAR", patient: "Rupa S Poojary", bank: "DBS BANK", branch: "Shivaji Nagar", ifsc: "DBSS0IN0162", chequeNo: "000359", date: "25-Dec-2025", amount: "25000.00", clearDate: "", status: "Pending" },
-    { id: 5, invoiceNo: "INV191123", clinic: "KALYAN NAGAR", patient: "Rupa S Poojary", bank: "DBS BANK", branch: "Shivaji Nagar", ifsc: "DBSS0IN0162", chequeNo: "000358", date: "15-Dec-2025", amount: "25000.00", clearDate: "", status: "Pending" },
-    { id: 6, invoiceNo: "INV192381", clinic: "Borivali", patient: "Reginald Colacor", bank: "Bassein catholic co operative Bank", branch: "Mandepeshwar", ifsc: "BACB0000028", chequeNo: "100014", date: "15-Dec-2025", amount: "18000.00", clearDate: "17-Dec-2025", status: "Cheque Clear" },
-    { id: 7, invoiceNo: "MAH002642526", clinic: "Borivali", patient: "Suresh Desai", bank: "Greater bank", branch: "Mira road", ifsc: "GBCB0000023", chequeNo: "315887", date: "15-Dec-2025", amount: "90000.00", clearDate: "18-Dec-2025", status: "Cheque Clear" },
-    { id: 8, invoiceNo: "INV186017", clinic: "Dombivali East", patient: "SHWETA MHATRE", bank: "BANK OF BARODA", branch: "NILJE GURAVALI", ifsc: "BARB0NILJEX", chequeNo: "000022", date: "15-Dec-2025", amount: "25000.00", clearDate: "19-Dec-2025", status: "Cheque Clear" },
-    { id: 9, invoiceNo: "INV147856", clinic: "Mysore", patient: "VEENA INNANJI", bank: "STATE BANK OF INDIA", branch: "SRIRAMPURA 2ND STAGE", ifsc: "SBIN0017797", chequeNo: "797011", date: "13-Dec-2025", amount: "10000.00", clearDate: "18-Dec-2025", status: "Cheque Clear" },
-    { id: 10, invoiceNo: "GUJ001812526", clinic: "Shahibaug", patient: "Bhawarlal Doshi", bank: "icici bank", branch: "shahibaug branch", ifsc: "ICIC0000294", chequeNo: "023227", date: "13-Dec-2025", amount: "10000.00", clearDate: "15-Dec-2025", status: "Cheque Clear" },
-  ]);
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await getChequeInvoices(filters);
+        // Temporary client-side filtering until real backend handles it
+        const filtered = response.filter((item) => {
+            const matchPatient = !filters.patientName || item.patient.toLowerCase().includes(filters.patientName.toLowerCase());
+            return matchPatient;
+        });
+        setData(filtered);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load invoice data.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, []);
+
+  const handleSearch = () => {
+      setCurrentPage(1);
+      fetchData();
+  };
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({
@@ -46,11 +65,7 @@ export default function ChequeInvoicePage() {
     }));
   };
 
-   // Filter Data
-  const filteredData = mockData.filter((item) => {
-      const matchPatient = !filters.patientName || item.patient.toLowerCase().includes(filters.patientName.toLowerCase());
-      return matchPatient;
-  });
+  const filteredData = data;
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -108,6 +123,7 @@ export default function ChequeInvoicePage() {
         <div className="md:col-span-3 flex gap-2">
             <Button
                 size="sm"
+                onClick={handleSearch}
                 className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-6 h-9 rounded-md"
             >
                 Search
@@ -141,7 +157,20 @@ export default function ChequeInvoicePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentItems.map((row, index) => (
+                {isLoading ? (
+                  <TableRow>
+                     <TableCell colSpan={12} className="text-center py-8">
+                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                       <p className="text-sm text-gray-500 mt-2">Loading cheques...</p>
+                     </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                     <TableCell colSpan={12} className="text-center py-8 text-red-500">
+                       {error}
+                     </TableCell>
+                  </TableRow>
+                ) : currentItems.map((row, index) => (
                     <TableRow key={row.id} className="border-b border-gray-50 dark:border-[#443C68]/50 hover:bg-gray-50 dark:bg-[#18122B] dark:hover:bg-[#393053]/50 text-xs">
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.invoiceNo}</TableCell>
@@ -157,7 +186,7 @@ export default function ChequeInvoicePage() {
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.status}</TableCell>
                     </TableRow>
                 ))}
-                {currentItems.length === 0 && (
+                {!isLoading && currentItems.length === 0 && (
                   <TableRow>
                      <TableCell colSpan={12} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
                   </TableRow>

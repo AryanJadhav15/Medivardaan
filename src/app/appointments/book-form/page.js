@@ -105,15 +105,15 @@ export default function BookAppointmentFormPage() {
     <div className="max-w-4xl mx-auto p-6 bg-card text-card-foreground rounded-lg shadow-sm border border-border">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6"></div>
       <div className="flex items-center gap-3 pb-2 border-b border-gray-200 dark:border-[#443C68]/50">
-          <div className="p-2 rounded-lg bg-primary/10 dark:bg-white/15">
+          <div className="p-2 rounded-lg bg-primary/10 dark:bg-white/15 mb-5">
             <Calendar className="w-5 h-5 text-primary dark:text-[#3aaecb]" />
           </div>
-          <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
+          <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide p-5 mb-5">
               Book Appointment
           </h1>
         </div>
       {/* Clinic & Doctor Information */}
-      <div className="mb-8">
+      <div className="mb-8 mt-8">
         <h2 className="text-foreground font-semibold mb-4">
           Clinic & Doctor Information
         </h2>

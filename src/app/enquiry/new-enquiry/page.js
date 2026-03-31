@@ -246,7 +246,7 @@ export default function NewLeadPage() {
                        <p className="text-sm text-gray-500 dark:text-white/50 mt-2">Loading leads...</p>
                     </TableCell>
                   </TableRow>
-                ) : (
+                ) : ( 
                 leads.length > 0 ? (
                   leads.map((lead, index) => (
                   <TableRow

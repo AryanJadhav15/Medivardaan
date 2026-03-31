@@ -47,8 +47,18 @@ export default function AppointmentsReportPage() {
     setIsLoading(true);
     setError(null);
     try {
-        const response = await getAppointmentsReport();
-        setAppointments(response);
+        const params = {
+           FromDate: fromDate,
+           ToDate: toDate,
+           ClinicName: clinic !== 'all' ? clinic : '',
+           Status: status,
+           SearchText: visitorName,
+        };
+        // Clean empty params
+        Object.keys(params).forEach(key => !params[key] && delete params[key]);
+
+        const response = await getAppointmentsReport(params);
+        setAppointments(Array.isArray(response) ? response : (response?.data || response?.appointments || []));
     } catch (err) {
         console.error(err);
         setError("Failed to load appointments report.");
@@ -68,10 +78,14 @@ export default function AppointmentsReportPage() {
 
   // Filter Logic (Simple implementation)
   const filteredAppointments = appointments.filter(apt => {
-     const matchClinic = clinic ? apt.clinic === clinic : true; // In real app, IDs would match
-     const matchName = visitorName ? apt.name.toLowerCase().includes(visitorName.toLowerCase()) : true;
-     const matchStatus = status ? apt.status.toLowerCase() === status.toLowerCase() : true;
-     return matchName; // Simplify to just name for now as mock data might not align perfectly with filters
+     const aptName = apt.name || apt.patientName || "";
+     const aptClinic = apt.clinic || apt.clinicName || "";
+     const aptStatus = apt.status || apt.appointmentStatus || "";
+
+     const matchClinic = (clinic && clinic !== 'all') ? aptClinic.toLowerCase() === clinic.toLowerCase() : true; 
+     const matchName = visitorName ? aptName.toLowerCase().includes(visitorName.toLowerCase()) : true;
+     const matchStatus = status ? aptStatus.toLowerCase() === status.toLowerCase() : true;
+     return matchName && matchClinic && matchStatus; 
   });
 
 
@@ -194,17 +208,17 @@ export default function AppointmentsReportPage() {
                  </TableCell>
                </TableRow>
             ) : currentItems.map((item, index) => (
-              <TableRow key={item.id} >
+              <TableRow key={item.id || item.appointmentID || index} >
                 <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell className="dark:text-white/75">{item.name}</TableCell>
-                <TableCell className="dark:text-white/75">{item.mobile}</TableCell>
-                <TableCell className="dark:text-white/75">{item.clinic}</TableCell>
-                <TableCell className="dark:text-white/75">{item.doctor}</TableCell>
-                <TableCell className="dark:text-white/75">{item.date}</TableCell>
-                <TableCell className="dark:text-white/75">{item.time}</TableCell>
-                <TableCell className="dark:text-white/75">{item.bookedBy}</TableCell>
-                <TableCell className="dark:text-white/75">{item.status}</TableCell>
-                <TableCell className="dark:text-white/75">{item.visitStatus}</TableCell>
+                <TableCell className="dark:text-white/75">{item.name || item.patientName || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.mobile || item.mobileNo || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.clinic || item.clinicName || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.doctor || item.doctorName || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.date || item.appointmentDate || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.time || item.appointmentTime || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.bookedBy || item.createdBy || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.status || item.appointmentStatus || "N/A"}</TableCell>
+                <TableCell className="dark:text-white/75">{item.visitStatus || "N/A"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

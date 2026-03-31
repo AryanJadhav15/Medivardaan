@@ -6,14 +6,13 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     
-    // Extract query parameters
-    const mode = searchParams.get('Mode') || searchParams.get('mode');
-    const doctorID = searchParams.get('DoctorID') || searchParams.get('doctorID');
-
-    // Construct query string for backend
+    // Pass all query parameters to the backend
     const backendParams = new URLSearchParams();
-    if (mode) backendParams.append('Mode', mode);
-    if (doctorID && doctorID !== 'all' && doctorID !== '0') backendParams.append('DoctorID', doctorID);
+    searchParams.forEach((value, key) => {
+        // Skip null or 'all' values for doctor/clinic if needed
+        if ((key.toLowerCase() === 'doctorid' || key.toLowerCase() === 'clinic') && (value === 'all' || value === '0' || value === '')) return;
+        if (value) backendParams.append(key, value);
+    });
 
     // Get Auth Token
     let token;

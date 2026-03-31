@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings } from "lucide-react";
+import { Settings, User } from "lucide-react";
 import { TableWrapper } from "@/components/shared/TableWrapper";
 
 export default function PatientClinicTransferPage() {
@@ -114,7 +114,7 @@ export default function PatientClinicTransferPage() {
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-2 text-primary mb-8 border-b border-border pb-4">
-        <Settings className="w-5 h-5 text-medivardaan-teal" />
+        <User className="w-5 h-5 text-medivardaan-teal" />
         <h1 className="text-xl font-bold tracking-tight text-medivardaan-teal uppercase">
           Patient Clinic Transfer
         </h1>

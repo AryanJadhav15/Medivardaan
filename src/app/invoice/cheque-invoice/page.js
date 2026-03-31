@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSpreadsheet, Settings, Loader2 } from "lucide-react";
+import { FileSpreadsheet, Receipt, Settings } from "lucide-react";
 import CustomPagination from "@/components/ui/custom-pagination";
 import { getChequeInvoices } from "@/api/invoices";
 
@@ -77,7 +77,7 @@ export default function ChequeInvoicePage() {
     <div className="w-full p-4 space-y-6 min-h-screen bg-white dark:bg-[#18122B]">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-         <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+         <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
          <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
             CHEQUE INVOICE
          </h1>
@@ -102,7 +102,7 @@ export default function ChequeInvoicePage() {
            <Label className="text-xs font-semibold text-gray-500 dark:text-white/60">From Date</Label>
           <Input
              type="date"
-             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50"
+             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 hover:cursor-pointer"
              value={filters.fromPaymentDate}
              onChange={(e) => handleFilterChange("fromPaymentDate", e.target.value)}
           />
@@ -110,10 +110,10 @@ export default function ChequeInvoicePage() {
 
          {/* To Date */}
          <div className="md:col-span-3">
-           <Label className="text-xs font-semibold text-gray-500 dark:text-white/60">To Date</Label>
+           <Label className="text-xs font-semibold text-gray-500 dark:text-white/60 ">To Date</Label>
           <Input
              type="date"
-             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50"
+             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 hover:cursor-pointer"
              value={filters.toPaymentDate}
              onChange={(e) => handleFilterChange("toPaymentDate", e.target.value)}
           />

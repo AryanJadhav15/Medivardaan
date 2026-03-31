@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Settings, CreditCard, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Settings, CreditCard, Receipt, ReceiptIcon } from "lucide-react";
+
 import { toast } from "sonner";
 import { useClinics } from "@/hooks/useClinics";
 import { useDoctors } from "@/hooks/useDoctors";
@@ -132,9 +133,9 @@ export default function PaymentCollectionPage() {
     <div className="w-full p-4 space-y-6 min-h-screen bg-white dark:bg-[#18122B]">
        {/* Header */}
       <div className="flex items-center gap-3 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-             <Settings className="w-6 h-6 text-primary animate-spin-slow" />
-        </div>
+        
+             <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
+        
         <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
           PAYMENT COLLECTION
         </h1>

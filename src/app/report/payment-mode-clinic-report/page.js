@@ -174,9 +174,9 @@ export default function PaymentModeClinicReportPage() {
     <div className="w-full min-h-screen bg-white dark:bg-[#18122B] p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-          <Settings className="w-4 h-4 text-primary" />
-        </div>
+        
+          <FileSpreadsheet className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
+        
         <h1 className="text-xl font-bold text-medivardaan-teal uppercase">
           PAYMENT MODE CLINIC REPORT
         </h1>

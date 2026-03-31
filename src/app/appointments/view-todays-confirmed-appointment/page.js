@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Settings, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { Calendar, Receipt, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,7 +65,7 @@ export default function ViewTodaysConfirmedAppointments() {
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+        <Calendar className="w-5 h-5 text-primary animate-spin-slow" />
         <h1 className="text-lg font-bold text-medivardaan-teal uppercase tracking-wide">
           Todays Appointment
         </h1>

@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, CreditCard, Loader2 } from "lucide-react"; 
+import { Settings, CreditCard, Receipt } from "lucide-react"; 
+
 import { toast } from "sonner";
 
 // Hooks
@@ -67,9 +68,9 @@ export default function UpgradationPage() {
     <div className="w-full p-6 space-y-6 min-h-screen bg-white dark:bg-[#18122B] transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center gap-3 pb-2 border-b border-gray-200 dark:border-[#443C68]/50">
-         <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-             <Settings className="w-5 h-5 text-primary animate-spin-slow" />
-         </div>
+      
+            <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
+      
         <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
           UPGRADATION
         </h1>
@@ -145,7 +146,7 @@ export default function UpgradationPage() {
               <Label className="text-sm font-semibold text-gray-700 dark:text-white/75">Cancellation Date</Label>
               <Input
                 type="date"
-                className="h-10 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50"
+                className="h-10 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 hover:cursor-pointer"
                 value={formData.cancellationDate}
                 onChange={(e) => handleInputChange("cancellationDate", e.target.value)}
               />
@@ -158,22 +159,22 @@ export default function UpgradationPage() {
                     <CreditCard className="w-32 h-32 text-teal-900" />
                 </div>
                 <CardContent className="p-6 relative z-10">
-                   <h3 className="text-lg font-bold text-teal-800 dark:text-[#635985] border-b border-teal-200 dark:border-[#443C68]/50 pb-2 mb-4">Invoice Summary</h3>
+                   <h3 className="text-lg font-bold text-teal-800 dark:text-[#635985] border-b border-teal-200 dark:text-white/75 pb-2 mb-4">Invoice Summary</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-teal-800 dark:text-[#635985] uppercase tracking-wider">TOTAL COST (₹)</Label>
+                            <Label className="text-xs font-bold text-teal-800 dark:text-white/75 uppercase tracking-wider">TOTAL COST (₹)</Label>
                             <div className="h-10 flex items-center px-3 bg-white dark:bg-[#18122B] border border-teal-200 dark:border-[#443C68]/50 rounded-md text-sm font-semibold text-teal-900 dark:text-white/90">0.00</div> 
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-teal-800 dark:text-[#635985] uppercase tracking-wider">TOTAL DISCOUNT (₹)</Label>
+                            <Label className="text-xs font-bold text-teal-800 dark:text-white/75 uppercase tracking-wider">TOTAL DISCOUNT (₹)</Label>
                             <div className="h-10 flex items-center px-3 bg-white dark:bg-[#18122B] border border-teal-200 dark:border-[#443C68]/50 rounded-md text-sm font-semibold text-teal-900 dark:text-white/90">0.00</div>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-teal-800 dark:text-[#635985] uppercase tracking-wider">TOTAL TAX (₹)</Label>
+                            <Label className="text-xs font-bold text-teal-800 dark:text-white/75 uppercase tracking-wider">TOTAL TAX (₹)</Label>
                             <div className="h-10 flex items-center px-3 bg-white dark:bg-[#18122B] border border-teal-200 dark:border-[#443C68]/50 rounded-md text-sm font-semibold text-teal-900 dark:text-white/90">0.00</div>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">GRAND TOTAL(₹)</Label>
+                            <Label className="text-xs font-bold text-red-600 dark:text-white/75 uppercase tracking-wider">GRAND TOTAL(₹)</Label>
                             <div className="h-10 flex items-center px-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-md text-sm font-bold text-red-700 dark:text-red-300">0.00</div>
                         </div>
                     </div>

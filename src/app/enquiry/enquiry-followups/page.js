@@ -27,6 +27,7 @@ import {
     UserPlus,
     RotateCcw,
     Search,
+    ClipboardList,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Virtuoso } from "react-virtuoso";
@@ -275,7 +276,7 @@ export default function EnquiryFollowupsPage() {
 
     return (
         <div className="w-full p-6 space-y-6 bg-white dark:bg-[#18122B] min-h-screen">
-            <PageHeader title="FOLLOWUP DETAILS" icon={Settings} />
+            <PageHeader title="FOLLOWUP DETAILS" icon={ClipboardList} />
 
             {/* Filter Section - Standardized Layout */}
             <Card className="border-2 border-primary/10 dark:border-[#443C68]/50 shadow-sm">

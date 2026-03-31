@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Settings, Search, X, FileSpreadsheet } from "lucide-react"; 
+import { Loader2, Settings, Search, X, FileSpreadsheet, Receipt } from "lucide-react"; 
 import CustomPagination from "@/components/ui/custom-pagination";
 
 // Hooks
@@ -77,16 +77,15 @@ export default function ViewInvoicePage() {
     <div className="w-full p-4 space-y-6 min-h-screen bg-white dark:bg-[#18122B] transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center gap-3 pb-2 border-b border-gray-200 dark:border-[#443C68]/50">
-        <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20">
-             <Settings className="w-5 h-5 text-primary dark:text-primary animate-spin-slow" />
-        </div>
+        
+            <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
         <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
           View Invoices
         </h1>
       </div>
 
       {/* Filters Section */}
-      <Card className="border-border shadow-sm bg-card">
+      <Card className="border border-gray-200 dark:border-[#443C68]/50 shadow-sm bg-white dark:bg-[#18122B]">
         <CardContent className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Clinic Name */}
@@ -163,16 +162,16 @@ export default function ViewInvoicePage() {
                         <Label className="text-sm font-medium text-foreground/80">From Date</Label>
                         <Input
                             type="date"
-                            className="h-10 bg-background border-input"
+                            className="h-10 bg-background border-input hover:cursor-pointer"
                             value={filters.fromDate}
                             onChange={(e) => handleFilterChange("fromDate", e.target.value)}
                         />
                     </div>
                     <div className="space-y-2 w-full md:w-48">
-                        <Label className="text-sm font-medium text-foreground/80">To Date</Label>
+                        <Label className="text-sm font-medium text-foreground/80 " >To Date</Label>
                         <Input
                             type="date"
-                            className="h-10 bg-background border-input"
+                            className="h-10 bg-background border-input hover:cursor-pointer"
                             value={filters.toDate}
                             onChange={(e) => handleFilterChange("toDate", e.target.value)}
                         />
@@ -235,7 +234,7 @@ export default function ViewInvoicePage() {
                   currentItems.map((inv, index) => (
                     <TableRow key={inv.invoiceID || index} className="border-b border-gray-50 dark:border-[#443C68]/50 hover:bg-gray-50 dark:bg-[#18122B] dark:hover:bg-[#393053]/50 text-xs">
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
-                      <TableCell className="py-2 font-medium text-primary cursor-pointer hover:underline">{inv.invoiceNo}</TableCell>
+                      <TableCell className="py-2 font-medium text-gray-700 dark:text-white/90 uppercase hover:underline">{inv.invoiceNo}</TableCell>
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{inv.clinicName}</TableCell>
                       <TableCell className="py-2 text-xs font-mono text-gray-500 dark:text-white/50">{inv.patientCode}</TableCell>
                       <TableCell className="py-2 font-medium text-gray-700 dark:text-white/90 uppercase">{inv.patientName}</TableCell>

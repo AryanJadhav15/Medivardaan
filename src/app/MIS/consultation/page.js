@@ -27,6 +27,7 @@ import {
   Save,
   Loader2,
   Settings,
+  User,
 } from "lucide-react";
 import { upsertConsultation } from "@/api/consultation";
 import { patientService } from "@/api/client/patients";
@@ -373,7 +374,7 @@ export default function ConsultationPage() {
       <div className="max-w-[1600px] mx-auto p-6 space-y-6" ref={printRef}>
         {/* Header */}
         <div className="flex items-center gap-2 text-primary mb-8 border-b border-border pb-4">
-          <Settings className="w-5 h-5 text-medivardaan-teal" />
+          <User className="w-5 h-5 text-medivardaan-teal" />
           <h1 className="text-xl font-bold tracking-tight text-medivardaan-teal uppercase">
             Consultation
           </h1>

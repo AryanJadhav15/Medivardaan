@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, Pencil, Eye, Trash2 } from "lucide-react";
+import { Settings, Pencil, Eye, Trash2, User } from "lucide-react";
 import { TableWrapper } from "@/components/shared/TableWrapper";
 
 export default function ConsentPage() {
@@ -56,7 +56,7 @@ export default function ConsentPage() {
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-2 text-primary mb-8 border-b border-border pb-4">
-        <Settings className="w-5 h-5 text-medivardaan-teal dark:text-medivardaan-purple" />
+        <User className="w-5 h-5 text-medivardaan-teal dark:text-medivardaan-purple" />
         <h1 className="text-xl font-bold tracking-tight text-medivardaan-teal dark:text-medivardaan-purple uppercase">
           Consent Details List
         </h1>

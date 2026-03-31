@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Receipt } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -97,9 +98,12 @@ export default function FinanceReconciliationPage() {
   return (
     <div className="w-full p-4 space-y-6 min-h-screen bg-white dark:bg-[#18122B]">
       {/* Header */}
+      <div className="flex ">
+      <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
       <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
         FINANCE RECONCILIATIONS
       </h1>
+      </div>
 
       {/* Filters Section */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white dark:bg-[#18122B] rounded-lg">
@@ -141,7 +145,7 @@ export default function FinanceReconciliationPage() {
            <Label className="text-xs font-semibold text-gray-500 dark:text-white/60">From Date</Label>
           <Input
              type="date"
-             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50"
+             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 hover:cursor-pointer"
              value={filters.fromDate}
              onChange={(e) => handleFilterChange("fromDate", e.target.value)}
           />
@@ -152,7 +156,7 @@ export default function FinanceReconciliationPage() {
            <Label className="text-xs font-semibold text-gray-500 dark:text-white/60">To Date</Label>
           <Input
              type="date"
-             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50"
+             className="h-9 bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50  hover:cursor-pointer"
              value={filters.toDate}
              onChange={(e) => handleFilterChange("toDate", e.target.value)}
           />

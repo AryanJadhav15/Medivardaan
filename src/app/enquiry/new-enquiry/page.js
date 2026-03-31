@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Settings, Eye, Trash2, Edit, Search, Plus } from "lucide-react";
+import { Settings, Eye, Trash2, Edit, Search, Plus, ClipboardList } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useClinics } from "@/hooks/useMasterData";
@@ -132,7 +132,7 @@ export default function NewLeadPage() {
     <div className="w-full p-6 space-y-6 bg-white dark:bg-[#18122B] min-h-screen">
       <PageHeader 
         title="LEAD" 
-        icon={Settings} 
+        icon={ClipboardList} 
       />
 
       {/* Filter Section - Standardized Layout */}

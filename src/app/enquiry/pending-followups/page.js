@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Settings, Home } from "lucide-react"
+import { Settings, Home, ClipboardList } from "lucide-react"
 import Link from "next/link"
 import CustomPagination from "@/components/ui/custom-pagination"
 import { PageHeader } from "@/components/shared/PageHeader"
@@ -51,19 +51,12 @@ export default function PendingFollowupsPage() {
   return (
     <div className="p-6 space-y-6 min-h-screen bg-gray-50/50 dark:bg-[#18122B] transition-colors duration-200">
       {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-muted-foreground mb-4">
-        <Link href="/dashboard" className="flex items-center hover:text-teal-600 dark:hover:text-[#635985] transition-colors">
-          <Home className="w-4 h-4 mr-1" />
-          Home
-        </Link>
-        <span className="mx-2">›</span>
-        <span className="text-foreground font-medium dark:text-white/90">Pending Follow up Report</span>
-      </div>
+      
 
       {/* Header */}
       <PageHeader 
         title="Pending Follow up Report" 
-        icon={Settings} 
+        icon={ClipboardList} 
       />
 
       {/* Filter Section */}

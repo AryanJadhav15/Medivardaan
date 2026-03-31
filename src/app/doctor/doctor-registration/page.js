@@ -32,11 +32,12 @@ import {
   Eye,
   Edit,
   Calendar,
-  X,
+  X,  
   Trash2,
   Clock,
   Search,
   Loader2,
+  Stethoscope,
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
@@ -369,7 +370,7 @@ export default function DoctorRegistrationPage() {
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen space-y-6">
       <PageHeader
         title="DOCTOR"
-        icon={Settings}
+        icon={Stethoscope}
         count={filteredDoctors.length}
       />
 

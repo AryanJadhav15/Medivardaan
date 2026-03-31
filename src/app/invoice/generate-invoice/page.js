@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, CreditCard, User, Calendar, Stethoscope } from "lucide-react";
+import { Settings, CreditCard, User, Calendar, Stethoscope, Receipt } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -35,9 +35,9 @@ export default function GenerateInvoicePage() {
     <div className="w-full p-6 space-y-8 min-h-screen bg-white dark:bg-[#18122B]">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-             <Settings className="w-6 h-6 text-primary animate-spin-slow" />
-        </div>
+       
+             <Receipt className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
+        
         <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
           GENERATE INVOICE
         </h1>
@@ -46,7 +46,7 @@ export default function GenerateInvoicePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Section */}
         <div className="lg:col-span-2 space-y-6">
-            <Card className="border border-gray-200 dark:border-[#443C68]/50 shadow-sm bg-white dark:bg-[#393053]">
+            <Card className="border border-gray-200 dark:border-[#443C68]/50 shadow-sm bg-white dark:bg-[#18122B]">
                 <CardContent className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Patient Name */}
@@ -127,11 +127,11 @@ export default function GenerateInvoicePage() {
                                     onValueChange={(val) => handleInputChange("treatmentType", val)}
                                 >
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Aligner" id="r1" className="text-red-500 border-gray-400" />
+                                        <RadioGroupItem value="Aligner" id="r1" className="text-white-500 border-gray-400" />
                                         <Label htmlFor="r1" className="font-medium text-gray-700 dark:text-white/75 cursor-pointer">Aligner</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Other" id="r2" className="text-red-500 border-gray-400" />
+                                        <RadioGroupItem value="Other" id="r2" className="text-white-500 border-gray-400" />
                                         <Label htmlFor="r2" className="font-medium text-gray-700 dark:text-white/75 cursor-pointer">Other</Label>
                                     </div>
                                 </RadioGroup>
@@ -145,10 +145,10 @@ export default function GenerateInvoicePage() {
         <div className="lg:col-span-1 space-y-6">
             <Card className="bg-[#E8F8F5] dark:bg-[#393053] border-none shadow-sm relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-4 opacity-5">
-                    <CreditCard className="w-24 h-24 text-teal-900" />
+                {/* <CreditCard className="w-24 h-24 text-teal-900" /> */}
                 </div>
                 <CardContent className="p-6 space-y-6 relative z-10">
-                   <h3 className="text-lg font-bold text-teal-800 dark:text-[#635985] border-b border-teal-200 dark:border-[#443C68]/50 pb-2 mb-4">Invoice Summary</h3>
+                   <h3 className="text-lg font-bold text-teal-800 dark:text-white/50     border-b border-teal-200 dark:border-[#443C68]/50 pb-2 mb-4">Invoice Summary</h3>
                    
                    <div className="space-y-4">
                         <div className="flex justify-between items-center text-teal-900 dark:text-white/75 text-sm font-medium">

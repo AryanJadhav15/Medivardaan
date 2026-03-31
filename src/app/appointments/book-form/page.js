@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Calendar, Check, X, Search, Filter } from 'lucide-react'
 
 import { upsertAppointment } from "@/api/appointments";
 import { transformAppointmentFormData } from "@/utils/appointmentTransformers";
@@ -100,7 +101,17 @@ export default function BookAppointmentFormPage() {
   };
 
   return (
+    
     <div className="max-w-4xl mx-auto p-6 bg-card text-card-foreground rounded-lg shadow-sm border border-border">
+      <div className="max-w-[1600px] mx-auto p-6 space-y-6"></div>
+      <div className="flex items-center gap-3 pb-2 border-b border-gray-200 dark:border-[#443C68]/50">
+          <div className="p-2 rounded-lg bg-primary/10 dark:bg-white/15">
+            <Calendar className="w-5 h-5 text-primary dark:text-[#3aaecb]" />
+          </div>
+          <h1 className="text-xl font-bold text-medivardaan-teal uppercase tracking-wide">
+              Book Appointment
+          </h1>
+        </div>
       {/* Clinic & Doctor Information */}
       <div className="mb-8">
         <h2 className="text-foreground font-semibold mb-4">
@@ -248,6 +259,7 @@ export default function BookAppointmentFormPage() {
           </Button>
         </div>
       </div>
-    </div>
-  );
+      </div>
+    
+  )
 }

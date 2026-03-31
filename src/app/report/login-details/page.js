@@ -102,7 +102,7 @@ export default function LoginDetailsPage() {
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+        <FileSpreadsheet className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
         <h1 className="text-lg font-bold text-medivardaan-teal uppercase tracking-wide">
           LOGIN
         </h1>
@@ -114,11 +114,11 @@ export default function LoginDetailsPage() {
             <div className="space-y-4">
                 <RadioGroup value={loginType} onValueChange={setLoginType} className="flex gap-6">
                     <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="clinic" id="clinic" className="text-blue-600 border-blue-600" />
+                    <RadioGroupItem value="clinic" id="clinic" className="text-white-600 border-blue-600" />
                     <Label htmlFor="clinic" className="text-gray-700 dark:text-white/75 font-medium">Clinic</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="doctor" id="doctor" className="border-gray-400" />
+                    <RadioGroupItem value="doctor" id="doctor" className="text-white-600 border-blue-600" />
                     <Label htmlFor="doctor" className="text-gray-700 dark:text-white/75 font-medium">Doctor</Label>
                     </div>
                 </RadioGroup>

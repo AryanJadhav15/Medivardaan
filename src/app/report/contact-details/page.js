@@ -53,7 +53,7 @@ export default function ContactDetailsPage() {
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+        <FileSpreadsheet className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
         <h1 className="text-lg font-bold text-medivardaan-teal uppercase tracking-wide">
           CONTACT DETAILS
         </h1>

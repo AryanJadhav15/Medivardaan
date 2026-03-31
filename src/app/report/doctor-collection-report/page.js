@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, FileSpreadsheet } from "lucide-react";
+import { Settings, FileSpreadsheet, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -73,7 +73,7 @@ export default function DoctorCollectionReportPage() {
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-200 dark:border-[#443C68]/50 pb-4">
-        <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+        <FileBarChart className="w-5 h-5 font-bold text-medivardaan-teal uppercase tracking-wid" />
         <h1 className="text-lg font-bold text-medivardaan-teal uppercase tracking-wide">
           DOCTOR COLLECTION REPORT
         </h1>

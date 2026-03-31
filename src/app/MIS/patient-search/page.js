@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Edit, Settings } from "lucide-react";
+import { Eye, Edit, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { patientService } from "@/api/patient";
 import CustomPagination from "@/components/ui/custom-pagination";
@@ -104,7 +104,7 @@ export default function PatientSearchPage() {
     <div className="min-h-screen bg-gray-50/50 dark:bg-[#18122B] pb-8 transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6">
         <div className="flex items-center gap-2 text-primary mb-8 border-b border-border pb-4">
-          <Settings className="w-5 h-5 text-medivardaan-teal" />
+          <User className="w-5 h-5 text-medivardaan-teal" />
           <h1 className="text-xl font-bold tracking-tight text-medivardaan-teal uppercase">
             Patient Search
           </h1>

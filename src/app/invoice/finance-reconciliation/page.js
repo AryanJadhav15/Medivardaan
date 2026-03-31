@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,8 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getFinanceReconciliations } from "@/api/invoices";
 
 export default function FinanceReconciliationPage() {
   const [filters, setFilters] = useState({
@@ -34,20 +35,38 @@ export default function FinanceReconciliationPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Mock Data
-  const [data, setData] = useState([
-    { id: 1, clinic: "Dehradun", pCode: "P113605", pName: "neha verma", invNo: "UTP003122526", date: "17-Dec-2025", rev: "32,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "Shopse- Credit Card Bank" },
-    { id: 2, clinic: "Secunderabad", pCode: "P113614", pName: "Nithin Javvaji", invNo: "TEL003352526", date: "17-Dec-2025", rev: "72,450.00", disb: "0.00", lan: "", sub: "0.00", mode: "Bajaj finance" },
-    { id: 3, clinic: "Secunderabad", pCode: "P113614", pName: "Nithin Javvaji", invNo: "TEL003342526", date: "17-Dec-2025", rev: "31,050.00", disb: "0.00", lan: "", sub: "0.00", mode: "Bajaj finance" },
-    { id: 4, clinic: "LB NAGAR", pCode: "P113583", pName: "adla srinivas reddy", invNo: "TEL003162526", date: "16-Dec-2025", rev: "1,00,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "Shopse- Credit Card Bank" },
-    { id: 5, clinic: "MADHAPUR", pCode: "P113577", pName: "vijay kumar l", invNo: "TEL002292526", date: "16-Dec-2025", rev: "45,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "Shopse - Preapproved Debit Card + Cardless EMI" },
-    { id: 6, clinic: "MADHAPUR", pCode: "P113282", pName: "sreya B", invNo: "TEL000562526", date: "17-Dec-2025", rev: "23,800.00", disb: "0.00", lan: "", sub: "0.00", mode: "Zeropay" },
-    { id: 7, clinic: "MADHAPUR", pCode: "P113282", pName: "sreya B", invNo: "TEL000552526", date: "17-Dec-2025", rev: "10,200.00", disb: "0.00", lan: "", sub: "0.00", mode: "Zeropay" },
-    { id: 8, clinic: "Toli Chowki", pCode: "P113174", pName: "syed obaid", invNo: "TEL000102526", date: "09-Dec-2025", rev: "11,400.00", disb: "0.00", lan: "", sub: "0.00", mode: "SaveIn" },
-    { id: 9, clinic: "Annanagar", pCode: "P113906", pName: "RAJAM L", invNo: "TAN007932526", date: "22-Dec-2025", rev: "55,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "SaveIn" },
-    { id: 10, clinic: "Nanganallur", pCode: "P113801", pName: "KAVITHANJALI A", invNo: "TAN006432526", date: "21-Dec-2025", rev: "55,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "SaveIn" },
-    { id: 11, clinic: "Nanganallur", pCode: "P113802", pName: "Rakesh K", invNo: "TAN006432527", date: "22-Dec-2025", rev: "25,000.00", disb: "0.00", lan: "", sub: "0.00", mode: "SaveIn" },
-  ]);
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async (currentFilters = filters) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+        const response = await getFinanceReconciliations(currentFilters);
+        // Temporary client-side filtering until real backend handles it
+        const filtered = response.filter((item) => {
+            const matchClinic = !currentFilters.clinicName || item.clinic.toLowerCase().includes(currentFilters.clinicName.toLowerCase());
+            const matchInvoice = !currentFilters.invoiceNo || item.invNo.toLowerCase().includes(currentFilters.invoiceNo.toLowerCase());
+            return matchClinic && matchInvoice;
+        });
+        setData(filtered);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to load invoice data.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+      fetchData();
+  }, []);
+
+  const handleSearch = () => {
+      setCurrentPage(1);
+      fetchData();
+  };
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({
@@ -57,20 +76,19 @@ export default function FinanceReconciliationPage() {
   };
 
   const handleClear = () => {
-    setFilters({
+    const emptyFilters = {
       clinicName: "",
       invoiceNo: "",
       fromDate: "",
       toDate: "",
-    });
+    };
+    setFilters(emptyFilters);
+    setCurrentPage(1);
+    fetchData(emptyFilters);
   };
 
   // Filter Data
-  const filteredData = data.filter((item) => {
-      const matchClinic = !filters.clinicName || item.clinic.toLowerCase().includes(filters.clinicName.toLowerCase());
-      const matchInvoice = !filters.invoiceNo || item.invNo.toLowerCase().includes(filters.invoiceNo.toLowerCase());
-      return matchClinic && matchInvoice;
-  });
+  const filteredData = data;
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -148,6 +166,7 @@ export default function FinanceReconciliationPage() {
         <div className="md:col-span-3 flex gap-2">
             <Button
                 size="sm"
+                onClick={handleSearch}
                 className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-6 h-9 rounded-md"
             >
                 Search
@@ -188,7 +207,20 @@ export default function FinanceReconciliationPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentItems.map((row, index) => (
+                {isLoading ? (
+                  <TableRow>
+                     <TableCell colSpan={12} className="text-center py-8">
+                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                       <p className="text-sm text-gray-500 mt-2">Loading reconciliations...</p>
+                     </TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                     <TableCell colSpan={12} className="text-center py-8 text-red-500">
+                       {error}
+                     </TableCell>
+                  </TableRow>
+                ) : currentItems.map((row, index) => (
                     <TableRow key={row.id} className="border-b border-gray-50 dark:border-[#443C68]/50 hover:bg-gray-50 dark:bg-[#18122B] dark:hover:bg-[#393053]/50 text-xs">
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
                       <TableCell className="py-2">
@@ -211,7 +243,7 @@ export default function FinanceReconciliationPage() {
                       <TableCell className="py-2 text-gray-600 dark:text-white/75">{row.mode}</TableCell>
                     </TableRow>
                 ))}
-                 {currentItems.length === 0 && (
+                 {!isLoading && currentItems.length === 0 && (
                   <TableRow>
                      <TableCell colSpan={12} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
                   </TableRow>

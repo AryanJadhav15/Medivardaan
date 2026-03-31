@@ -15,11 +15,17 @@ import {
 } from "@/components/ui/select";
 import { Settings, CreditCard, Receipt } from "lucide-react"; 
 
+import { toast } from "sonner";
+
 // Hooks
 import { useDoctors } from "@/hooks/useDoctors";
+import { useClinics } from "@/hooks/useClinics";
+import { submitUpgradation } from "@/api/invoices";
 
 export default function UpgradationPage() {
-  const { data: doctors = [] } = useDoctors();
+  const { data: clinics = [], isLoading: loadingClinics } = useClinics();
+  const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     patientName: "",
@@ -35,6 +41,27 @@ export default function UpgradationPage() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.patientName || !formData.clinicName) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      await submitUpgradation(formData);
+      toast.success("Upgradation submitted successfully!");
+      setFormData({
+         patientName: "", clinicName: "", doctorName: "",
+         cancellationDate: "2025-12-22", reason: "", creditNoteAmount: "0"
+      });
+    } catch (err) {
+      toast.error("Failed to submit upgradation.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -75,12 +102,17 @@ export default function UpgradationPage() {
                   <SelectValue placeholder="-- Select Clinic --" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value="panvel">Panvel</SelectItem>
-                <SelectItem value="pune">Pune</SelectItem>
-                <SelectItem value="mumbai">Mumbai</SelectItem>
-                <SelectItem value="nashik">Nashik</SelectItem>
-                <SelectItem value="dwarka">Dwarka</SelectItem>
-                <SelectItem value="borivali">Borivali</SelectItem>
+                  {loadingClinics ? (
+                    <SelectItem value="loading" disabled>Loading clinics...</SelectItem>
+                  ) : clinics.length > 0 ? (
+                    Array.from(new Map(clinics.map(c => [c.clinicName, c])).values()).map((clinic, index) => (
+                      <SelectItem key={`clinic-${clinic.clinicID || index}-${clinic.clinicName}`} value={clinic.clinicName}>
+                        {clinic.clinicName}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-data" disabled>No clinics available</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -95,12 +127,17 @@ export default function UpgradationPage() {
                   <SelectValue placeholder="--- Select ---" />
                 </SelectTrigger>
                 <SelectContent>
-                  {doctors.map((doc) => (
-                    <SelectItem key={doc.doctorID} value={doc.name}>
-                      {doc.name}
-                    </SelectItem>
-                  ))}
-                  {!doctors.length && <SelectItem value="dr-mock">Dr. Mock (Demo)</SelectItem>}
+                  {loadingDoctors ? (
+                    <SelectItem value="loading" disabled>Loading doctors...</SelectItem>
+                  ) : doctors.length > 0 ? (
+                    Array.from(new Map(doctors.map(d => [d.name, d])).values()).map((doc, index) => (
+                      <SelectItem key={`doc-${doc.doctorID || index}-${doc.name}`} value={doc.name}>
+                        {doc.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-data" disabled>No doctors available</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -183,8 +220,12 @@ export default function UpgradationPage() {
           
            {/* Submit Button */}
            <div className="flex justify-center pt-4">
-            <Button className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 h-10 font-bold shadow-md">
-                Submit Upgradation
+            <Button 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white text-md shadow-md transition-colors px-8 h-10 font-bold"
+            >
+                {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Upgradation"}
             </Button>
            </div>
 

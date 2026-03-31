@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -7,18 +7,30 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Calendar, Check, X, Search, Filter } from 'lucide-react'
 
-import { upsertAppointment } from "@/api/appointments"
-import { transformAppointmentFormData } from "@/utils/appointmentTransformers"
+import { upsertAppointment } from "@/api/appointments";
+import { transformAppointmentFormData } from "@/utils/appointmentTransformers";
 
 export default function BookAppointmentFormPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // Default values from params if available
-  const paramClinic = searchParams.get("clinic") || "Panvel"
-  const paramDoctor = searchParams.get("doctor") || ""
-  const paramDate = searchParams.get("date") || ""
-  
+  const paramClinic = searchParams.get("clinic") || "Panvel";
+  const paramDoctor = searchParams.get("doctor") || "";
+  const paramDate = searchParams.get("date") || "";
+
+  const getTodayDate = () => {
+    return new Date().toISOString().split("T")[0];
+    // format: yyyy-mm-dd (required for input type="date")
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    return now.toTimeString().slice(0, 5);
+    // format: HH:mm (required for input type="time")
+  };
+
   // Form State
   const [formData, setFormData] = useState({
     clinicName: paramClinic,
@@ -26,60 +38,67 @@ export default function BookAppointmentFormPage() {
     patientName: "",
     dob: "",
     age: "",
-    appointmentDate: paramDate,
-    appointmentTime: ""
-  })
+    appointmentDate: paramDate || getTodayDate(),
+    appointmentTime: getCurrentTime(),
+  });
 
   // Calculate age from DOB
   useEffect(() => {
     if (formData.dob) {
-      const birthDate = new Date(formData.dob)
-      const today = new Date()
-      let age = today.getFullYear() - birthDate.getFullYear()
-      const m = today.getMonth() - birthDate.getMonth()
+      const birthDate = new Date(formData.dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--
+        age--;
       }
-      setFormData(prev => ({ ...prev, age: age >= 0 ? age.toString() : "" }))
+      setFormData((prev) => ({ ...prev, age: age >= 0 ? age.toString() : "" }));
     } else {
-        setFormData(prev => ({ ...prev, age: "" }))
+      setFormData((prev) => ({ ...prev, age: "" }));
     }
-  }, [formData.dob])
+  }, [formData.dob]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async () => {
     // Validate required fields
-    if (!formData.clinicName || !formData.doctorName || !formData.patientName || !formData.dob || !formData.appointmentDate || !formData.appointmentTime) {
-      alert("Please fill in all required fields marked with *")
-      return
+    if (
+      !formData.clinicName ||
+      !formData.doctorName ||
+      !formData.patientName ||
+      !formData.dob ||
+      !formData.appointmentDate ||
+      !formData.appointmentTime
+    ) {
+      alert("Please fill in all required fields marked with *");
+      return;
     }
-    
+
     try {
-        console.log("Submitting Appointment:", formData)
-        
-        // Transform data
-        const apiPayload = transformAppointmentFormData(formData);
-        
-        // Call API
-        const response = await upsertAppointment(apiPayload);
-        
-        if (response) {
-            alert("Appointment booked successfully!");
-            router.push("/appointments/all-appointments-list");
-        }
+      console.log("Submitting Appointment:", formData);
+
+      // Transform data
+      const apiPayload = transformAppointmentFormData(formData);
+
+      // Call API
+      const response = await upsertAppointment(apiPayload);
+
+      if (response) {
+        alert("Appointment booked successfully!");
+        router.push("/appointments/all-appointments-list");
+      }
     } catch (error) {
-        console.error("Failed to book appointment:", error);
-        alert("Failed to book appointment. Please try again.");
+      console.error("Failed to book appointment:", error);
+      alert("Failed to book appointment. Please try again.");
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   return (
     
@@ -95,7 +114,9 @@ export default function BookAppointmentFormPage() {
         </div>
       {/* Clinic & Doctor Information */}
       <div className="mb-8">
-        <h2 className="text-foreground font-semibold mb-4">Clinic & Doctor Information</h2>
+        <h2 className="text-foreground font-semibold mb-4">
+          Clinic & Doctor Information
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="clinicName" className="text-muted-foreground">
@@ -127,7 +148,9 @@ export default function BookAppointmentFormPage() {
 
       {/* Patient Information */}
       <div className="mb-8">
-        <h2 className="text-foreground font-semibold mb-4">Patient Information</h2>
+        <h2 className="text-foreground font-semibold mb-4">
+          Patient Information
+        </h2>
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="patientName" className="text-muted-foreground">
@@ -142,7 +165,7 @@ export default function BookAppointmentFormPage() {
               className="bg-background border-input"
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 relative">
               <Label htmlFor="dob" className="text-muted-foreground">
@@ -178,37 +201,39 @@ export default function BookAppointmentFormPage() {
 
       {/* Appointment Schedule */}
       <div className="mb-8">
-        <h2 className="text-foreground font-semibold mb-4">Appointment Schedule</h2>
+        <h2 className="text-foreground font-semibold mb-4">
+          Appointment Schedule
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-             <Label htmlFor="appointmentDate" className="text-muted-foreground">
-                Appointment Date <span className="text-red-500">*</span>
-             </Label>
-             <Input
-                id="appointmentDate"
-                name="appointmentDate"
-                type="date"
-                placeholder="dd-mm-yyyy"
-                value={formData.appointmentDate}
-                onChange={handleChange}
-                className="bg-background border-input"
-             />
+            <Label htmlFor="appointmentDate" className="text-muted-foreground">
+              Appointment Date <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="appointmentDate"
+              name="appointmentDate"
+              type="date"
+              placeholder="dd-mm-yyyy"
+              value={formData.appointmentDate}
+              onChange={handleChange}
+              className="bg-background border-input"
+            />
           </div>
           <div className="space-y-2">
-             <Label htmlFor="appointmentTime" className="text-muted-foreground">
-                Appointment Time <span className="text-red-500">*</span>
-             </Label>
-             <div className="relative">
-                <Input
-                    id="appointmentTime"
-                    name="appointmentTime"
-                    type="time"
-                    placeholder="--:--"
-                    value={formData.appointmentTime}
-                    onChange={handleChange}
-                    className="bg-background border-input"
-                />
-             </div>
+            <Label htmlFor="appointmentTime" className="text-muted-foreground">
+              Appointment Time <span className="text-red-500">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="appointmentTime"
+                name="appointmentTime"
+                type="time"
+                placeholder="--:--"
+                value={formData.appointmentTime}
+                onChange={handleChange}
+                className="bg-background border-input"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -219,16 +244,16 @@ export default function BookAppointmentFormPage() {
           * Required fields
         </div>
         <div className="flex gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleCancel}
-            className="px-6 border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+            className="px-6 border-border text-foreground hover:bg-medivardaan-blue hover:text-white dark:hover:bg-medivardaan-purple-dark"
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSubmit}
-            className="px-6 bg-teal-600 hover:bg-teal-700 text-white"
+            className="px-6 bg-medivardaan-blue-light hover:bg-medivardaan-blue-dark text-white dark:bg-medivardaan-purple dark:hover:bg-medivardaan-purple-dark"
           >
             Book Appointment
           </Button>

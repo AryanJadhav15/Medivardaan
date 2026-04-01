@@ -3,6 +3,80 @@
  * Handles appointment operations via Next.js API Routes
  */
 
+const CONFIRMED_STATUS_VALUES = ["confirmed", "approved"];
+
+export const normalizeAppointmentStatus = (status, isPatientsConfirmed = null) => {
+    if (typeof status === "string" && status.trim()) {
+        return status.trim().toLowerCase();
+    }
+
+    if (isPatientsConfirmed === true) return "approved";
+    if (isPatientsConfirmed === false) return "rejected";
+
+    const numericStatus = Number(status);
+    if (Number.isNaN(numericStatus)) return "pending";
+    if (numericStatus === 1) return "approved";
+    if (numericStatus === 2) return "rejected";
+    return "pending";
+};
+
+const formatDateKey = (date) => {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
+const extractDateKey = (value) => {
+    if (!value) return "";
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return formatDateKey(value);
+    }
+
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        const isoMatch = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (isoMatch) return isoMatch[1];
+
+        const parsed = new Date(trimmed);
+        if (!Number.isNaN(parsed.getTime())) {
+            return formatDateKey(parsed);
+        }
+    }
+
+    return "";
+};
+
+export const normalizeAppointment = (appointment = {}) => {
+    const patientNo = appointment.patientNo || appointment.PatientNo || appointment.PatientCode || appointment.patientCode || appointment.UHID || appointment.uhid || appointment.appointmenNo || appointment.appointmentNo || "";
+    const patientName = appointment.patientName
+        || appointment.PatientName
+        || `${appointment.FirstName || appointment.firstName || ""} ${appointment.LastName || appointment.lastName || ""}`.trim();
+    const mobileNo = appointment.mobileNo || appointment.MobileNo || appointment.Mobile || appointment.mobile || appointment.PhoneNo || appointment.phoneNo || appointment.mobileNo1 || appointment.MobileNo1 || "";
+    const doctor = appointment.doctor
+        || appointment.doctorName
+        || appointment.DoctorName
+        || appointment.doctorFullName
+        || appointment.DoctorFullName
+        || "";
+    const appointmentDate = appointment.appointmentDate || appointment.AppointmentDate || appointment.startDate || appointment.StartDate || "";
+    const status = normalizeAppointmentStatus(
+        appointment.status ?? appointment.Status ?? appointment.appointmentStatus ?? appointment.AppointmentStatus,
+        appointment.isPatientsConfirmed ?? appointment.IsPatientsConfirmed
+    );
+
+    return {
+        ...appointment,
+        patientNo,
+        patientName,
+        mobileNo,
+        doctor,
+        appointmentDate,
+        status,
+    };
+};
+
 export const getAppointments = async (params = {}) => {
     if (typeof window === 'undefined') return []; // Safety check for server-side
 
@@ -82,19 +156,17 @@ export const getAppointmentsReport = async (params = {}) => {
 };
 
 export const getTodaysConfirmedAppointments = async (params = {}) => {
-    // Simulated API Request (Replace with axiosClient later)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return [
-      { patientNo: "P001", patientName: "Aarav Sharma", mobileNo: "9876543210", doctor: "Dr. Kinnari Lade" },
-      { patientNo: "P002", patientName: "Vivaan Patil", mobileNo: "8765432109", doctor: "Dr. Rajesh Kumar" },
-      { patientNo: "P003", patientName: "Aditya Verma", mobileNo: "7654321098", doctor: "Dr. Priya Singh" },
-      { patientNo: "P004", patientName: "Vihaan Singh", mobileNo: "6543210987", doctor: "Dr. Kinnari Lade" },
-      { patientNo: "P005", patientName: "Arjun Mehta", mobileNo: "9988776655", doctor: "Dr. Rajesh Kumar" },
-      { patientNo: "P006", patientName: "Sai Iyer", mobileNo: "8877665544", doctor: "Dr. Priya Singh" },
-      { patientNo: "P007", patientName: "Reyansh Reddy", mobileNo: "7766554433", doctor: "Dr. Kinnari Lade" },
-      { patientNo: "P008", patientName: "Ayaan Nair", mobileNo: "6655443322", doctor: "Dr. Rajesh Kumar" },
-      { patientNo: "P009", patientName: "Krishna Das", mobileNo: "5544332211", doctor: "Dr. Priya Singh" },
-      { patientNo: "P010", patientName: "Ishaan Kapoor", mobileNo: "9998887776", doctor: "Dr. Kinnari Lade" },
-    ];
+    const response = await getAppointments(params);
+    const appointments = Array.isArray(response)
+        ? response
+        : (response?.data || response?.appointments || []);
+    const todayKey = formatDateKey(new Date());
+
+    return appointments
+        .map(normalizeAppointment)
+        .filter((appointment) => {
+            const appointmentDateKey = extractDateKey(appointment.appointmentDate);
+            return appointmentDateKey === todayKey
+                && CONFIRMED_STATUS_VALUES.includes(appointment.status);
+        });
 };

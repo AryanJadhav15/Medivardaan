@@ -3,72 +3,51 @@
  */
 import axiosClient from "./client";
 
+export const normalizeInvoice = (invoice = {}) => {
+  const invoiceID = invoice.invoiceID || invoice.invoiceid || invoice.InvoiceID || invoice.id || null;
+  const invoiceNo = invoice.invoiceNo || invoice.InvoiceNo || String(invoiceID || "");
+  const patientId = invoice.patientID || invoice.patientid || invoice.PatientID || null;
+  const doctorId = invoice.doctorID || invoice.DoctorID || null;
+  const clinicId = invoice.clinicID || invoice.clinicId || invoice.ClinicID || null;
+  const grandTotal = Number(invoice.grandTotal ?? invoice.GrandTotal ?? invoice.totalCostAmount ?? invoice.totalAmount ?? 0);
+  const paidAmount = Number(invoice.paidAmount ?? invoice.PaidAmount ?? invoice.totalCostAmount ?? 0);
+  const pendingAmount = Number(
+    invoice.pendingAmount
+      ?? invoice.PendingAmount
+      ?? Math.max(grandTotal - paidAmount, 0)
+  );
+
+  return {
+    ...invoice,
+    invoiceID,
+    invoiceNo,
+    patientId,
+    doctorId,
+    clinicId,
+    patientCode: invoice.patientCode || invoice.PatientCode || (patientId ? `P-${patientId}` : "N/A"),
+    clinicName: invoice.clinicName || invoice.ClinicName || "",
+    patientName: invoice.patientName || invoice.PatientName || "",
+    mobileNo: invoice.mobileNo || invoice.MobileNo || "",
+    grandTotal,
+    paidAmount,
+    pendingAmount,
+    payDate: invoice.payDate || invoice.PayDate || "",
+  };
+};
+
 export const getAllInvoices = async (params = {}) => {
-  // Mock data since API is not ready
   const response = await axiosClient.get("/Invoice/GetAllInvoices", {
     params,
   });
-  return response;
+  const invoices = Array.isArray(response)
+    ? response
+    : (response?.data || response?.items || []);
+  return Array.isArray(invoices) ? invoices.map(normalizeInvoice) : [];
+};
 
-  return [
-    {
-      invoiceID: 1,
-      invoiceNo: "INV-001",
-      clinicName: "Panvel",
-      patientCode: "P001",
-      patientName: "Rahul Sharma",
-      mobileNo: "9876543210",
-      grandTotal: 5000,
-      paidAmount: 2000,
-      pendingAmount: 3000,
-    },
-    {
-      invoiceID: 2,
-      invoiceNo: "INV-002",
-      clinicName: "Pune",
-      patientCode: "P002",
-      patientName: "Aditi Singh",
-      mobileNo: "9876543211",
-      grandTotal: 10000,
-      paidAmount: 10000,
-      pendingAmount: 0,
-    },
-    // ... rest of mock data
-    {
-      invoiceID: 3,
-      invoiceNo: "INV-003",
-      clinicName: "Mumbai",
-      patientCode: "P003",
-      patientName: "Vikram Malhotra",
-      mobileNo: "9876543212",
-      grandTotal: 7500,
-      paidAmount: 5000,
-      pendingAmount: 2500,
-    },
-    {
-      invoiceID: 4,
-      invoiceNo: "INV-004",
-      clinicName: "Nashik",
-      patientCode: "P004",
-      patientName: "Sonia Patil",
-      mobileNo: "9876543213",
-      grandTotal: 3000,
-      paidAmount: 3000,
-      pendingAmount: 0,
-    },
-    {
-      invoiceID: 5,
-      invoiceNo: "INV-005",
-      clinicName: "Dwarka",
-      patientCode: "P005",
-      patientName: "Amit Verma",
-      mobileNo: "9876543214",
-      grandTotal: 12000,
-      paidAmount: 6000,
-      pendingAmount: 6000,
-      pendingAmount: 6000,
-    },
-  ];
+export const addInvoice = async (payload) => {
+  const response = await axiosClient.post("/Invoice/AddInvoice", payload);
+  return response;
 };
 
 export const deleteInvoice = async (invoiceId) => {

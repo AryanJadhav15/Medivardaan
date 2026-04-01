@@ -101,16 +101,44 @@ export const transformFormDataToAPI = (formData) => {
  * @returns {Object} Transformed data for display
  */
 export const transformAPILeadToDisplay = (apiLead) => {
+  const clinicId =
+    apiLead.clinicID ||
+    apiLead.ClinicID ||
+    apiLead.clinicId ||
+    apiLead.ClinicId;
+
+  const sourceId =
+    apiLead.leadSourceID ||
+    apiLead.LeadSourceID ||
+    apiLead.leadSourceId ||
+    apiLead.LeadSourceId ||
+    apiLead.SourceID ||
+    apiLead.sourceID ||
+    apiLead.SourceId ||
+    apiLead.sourceId;
+
   return {
     srNo: apiLead.leadID || apiLead.LeadID || apiLead.EnquiryID || apiLead.enquiryID,
     leadNo: apiLead.leadNo || apiLead.LeadNo || apiLead.EnquiryNo || apiLead.enquiryNo || `E${apiLead.leadID || apiLead.LeadID || apiLead.EnquiryID || apiLead.enquiryID}`,
-    name: `${apiLead.firstName || ''} ${apiLead.lastName || ''}`.trim(),
+    name: `${apiLead.firstName || apiLead.FirstName || ''} ${apiLead.lastName || apiLead.LastName || ''}`.trim(),
     mobileNo: apiLead.phoneNo1 || apiLead.PhoneNo1 || apiLead.MobileNo || apiLead.mobileNo || apiLead.Mobile || apiLead.mobile || '',
-    clinicName: apiLead.clinicName || apiLead.ClinicName || getClinicNameFromID(apiLead.clinicID || apiLead.ClinicID),
-    sourceName: apiLead.sourceName || apiLead.SourceName || getSourceNameFromID(apiLead.leadSourceID || apiLead.LeadSourceID || apiLead.SourceID || apiLead.sourceID),
+    clinicName:
+      apiLead.clinicName ||
+      apiLead.ClinicName ||
+      apiLead.clinic ||
+      apiLead.Clinic ||
+      getClinicNameFromID(clinicId),
+    sourceName:
+      apiLead.sourceName ||
+      apiLead.SourceName ||
+      apiLead.leadSource ||
+      apiLead.LeadSource ||
+      apiLead.source ||
+      apiLead.Source ||
+      getSourceNameFromID(sourceId),
     status: apiLead.patientFollowup || apiLead.PatientFollowup || apiLead.Status || apiLead.status || 'Patient',
     date: formatDate(apiLead.leadDate || apiLead.LeadDate || apiLead.EnquiryDate || apiLead.enquiryDate || apiLead.createdDate),
-    email: apiLead.emailid || apiLead.Emailid || '',
+    email: apiLead.emailid || apiLead.Emailid || apiLead.email || apiLead.Email || '',
   };
 };
 
@@ -133,10 +161,14 @@ const getClinicNameFromID = (clinicID) => {
  * @returns {string} Source name
  */
 const getSourceNameFromID = (sourceID) => {
-  const reverseMap = Object.entries(LEAD_SOURCE_MAP).reduce((acc, [key, value]) => {
-    acc[value] = key.charAt(0).toUpperCase() + key.slice(1);
-    return acc;
-  }, {});
+  const reverseMap = {
+    1: 'Google',
+    2: 'Facebook',
+    3: 'Instagram',
+    4: 'Justdial',
+    5: 'Reference',
+    6: 'Walk-in',
+  };
   return reverseMap[sourceID] || 'Unknown';
 };
 

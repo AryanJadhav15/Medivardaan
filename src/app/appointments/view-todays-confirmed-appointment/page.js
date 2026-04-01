@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Calendar, Receipt, Settings } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -52,14 +52,15 @@ export default function ViewTodaysConfirmedAppointments() {
   };
 
   const filteredResults = results.filter((item) =>
-    item.patientName.toLowerCase().includes(patientName.toLowerCase()) && 
-    item.patientNo.toLowerCase().includes(patientNo.toLowerCase())
+    (item.patientName || "").toLowerCase().includes(patientName.toLowerCase()) && 
+    (item.patientNo || "").toLowerCase().includes(patientNo.toLowerCase())
   );
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
+  const emptyMessage = "No confirmed appointments were returned by the API for today.";
 
   return (
     <div className="p-6 bg-white dark:bg-[#18122B] min-h-screen">
@@ -141,7 +142,7 @@ export default function ViewTodaysConfirmedAppointments() {
                   colSpan={5}
                   className="h-24 text-center text-gray-500 dark:text-white/60 font-medium"
                 >
-                  No Record Available
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}

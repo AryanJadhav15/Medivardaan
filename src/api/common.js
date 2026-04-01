@@ -13,22 +13,12 @@ import axiosClient from "./client";
  */
 // API endpoint is currently missing/404. Returning mock data directly to avoid console errors.
 export const getClinics = async () => {
-    
-    try {
-        const response = await axiosClient.get("/api/Clinic/GetAllClinic");
-        return response; 
-    } catch (error) {
-        console.warn("API /api/Clinic/GetAllClinic failed, using mock data.", error.message);
-    
-        return [
-            { clinicId: 1, clinicName: "Panvel" },
-            { clinicId: 2, clinicName: "Pune" },
-            { clinicId: 3, clinicName: "Mumbai" },
-            { clinicId: 4, clinicName: "Nashik" }
-        ]; 
-    
-    }
-
+    return [
+        { clinicId: 1, clinicID: 1, clinicName: "Panvel" },
+        { clinicId: 2, clinicID: 2, clinicName: "Pune" },
+        { clinicId: 3, clinicID: 3, clinicName: "Mumbai" },
+        { clinicId: 4, clinicID: 4, clinicName: "Nashik" }
+    ];
 };
 
 /**

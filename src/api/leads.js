@@ -83,3 +83,31 @@ export const getLeadById = async (id) => {
     }
     return null;
 };
+
+export const deleteLead = async (enquiryId) => {
+    // Get token from localStorage for auth header
+    let authHeader = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+        const token = localStorage.getItem("token") || localStorage.getItem("jwt_token");
+        if (token) {
+            authHeader = `Bearer ${token}`;
+        }
+    }
+
+    const response = await fetch(`/api/Leads/DeleteEnquiry?enquiryId=${enquiryId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(authHeader && { 'Authorization': authHeader })
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    // Sometimes DELETE response body is empty, handle safely
+    const text = await response.text();
+    return text ? JSON.parse(text) : { success: true };
+};

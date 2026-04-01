@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Check, X, Search, Filter } from 'lucide-react'
+import { Calendar, Check, Loader2, Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getAppointments } from '@/api/appointments'
+import { getAppointments, normalizeAppointment, normalizeAppointmentStatus } from '@/api/appointments'
 import { Pagination } from '@/components/Pagination'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { TableWrapper } from "@/components/shared/TableWrapper";
 import { useClinics } from '@/hooks/useClinics'
 import { useDoctors } from '@/hooks/useDoctors'
@@ -40,43 +40,6 @@ export default function AllAppointmentsListPage() {
   const { data: clinics = [], isLoading: loadingClinics } = useClinics();
   const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
 
-  // Mock Data for Fallback
-  const mockAppointments = [
-    {
-       AppointmentID: 101,
-       FirstName: "Raj",
-       LastName: "Sharma",
-       DoctorName: "Dr. Kinnari Lade",
-       AppointmentDate: "2025-01-02",
-       TimeSlot: "10:00 AM",
-       Status: "approved",
-       ClinicName: "Panvel",
-       MobileNo: "9876543210"
-    },
-    {
-       AppointmentID: 102,
-       FirstName: "Priya",
-       LastName: "Verma",
-       DoctorName: "Dr. Rajesh Kumar",
-       AppointmentDate: "2025-01-03",
-       TimeSlot: "11:30 AM",
-       Status: "pending",
-       ClinicName: "Mumbai",
-       MobileNo: "8765432109"
-    },
-    {
-       AppointmentID: 103,
-       FirstName: "Amit",
-       LastName: "Patel",
-       DoctorName: "Dr. Priya Singh",
-       AppointmentDate: "2025-01-04",
-       TimeSlot: "02:00 PM",
-       Status: "rejected",
-       ClinicName: "Pune",
-       MobileNo: "7654321098"
-    }
-  ];
-
   // Fetch Appointments
   const fetchAppointments = async () => {
     setLoading(true);
@@ -88,17 +51,15 @@ export default function AllAppointmentsListPage() {
       };
       
       const data = await getAppointments(params);
-      
-      if (Array.isArray(data) && data.length > 0) {
-        setAppointments(data);
-      } else {
-        console.warn('API returned empty or invalid data, using mock data.');
-        setAppointments(mockAppointments);
-      }
+      const appointmentList = Array.isArray(data)
+        ? data
+        : (data?.data || data?.appointments || []);
+
+      setAppointments(Array.isArray(appointmentList) ? appointmentList : []);
     } catch (err) {
-      console.warn('Failed to fetch appointments, using mock data:', err.message);
-      // Fallback to mock data on error so page renders
-      setAppointments(mockAppointments);
+      console.error('Failed to fetch appointments:', err.message);
+      setAppointments([]);
+      setError('Failed to load appointments from the API.');
     } finally {
       setLoading(false);
     }
@@ -106,7 +67,7 @@ export default function AllAppointmentsListPage() {
 
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDoctor]); 
+  }, []);
 
   const handleApprove = async (appointmentId) => {
     try {
@@ -155,14 +116,63 @@ export default function AllAppointmentsListPage() {
   }
 
   const handleSearch = () => {
+    fetchAppointments();
     setCurrentPage(1); 
   }
 
+  const doctorLookup = new Map(
+    doctors.map((doctor) => [
+      String(doctor.doctorID || doctor.DoctorID || ''),
+      doctor.name || doctor.doctorName || doctor.DoctorName || '',
+    ])
+  );
+
+  const clinicLookup = new Map(
+    clinics.map((clinic) => [
+      String(clinic.clinicID || clinic.ClinicID || ''),
+      clinic.clinicName || clinic.ClinicName || '',
+    ])
+  );
+
+  const normalizedAppointments = appointments.map((appointment) => {
+    const normalized = normalizeAppointment(appointment);
+    const appointmentId = appointment.AppointmentID || appointment.appointmentId || appointment.id || null;
+    const doctorId = appointment.doctorID || appointment.DoctorID || null;
+    const clinicId = appointment.clinicID || appointment.ClinicID || null;
+    const clinicName = appointment.clinicName
+      || appointment.ClinicName
+      || clinicLookup.get(String(clinicId || ''))
+      || 'N/A';
+    const doctorName = normalized.doctor
+      || doctorLookup.get(String(doctorId || ''))
+      || (doctorId ? `Dr. ID ${doctorId}` : 'N/A');
+    const rawDate = normalized.appointmentDate || '';
+    const parsedDate = rawDate ? new Date(rawDate) : null;
+
+    return {
+      ...appointment,
+      ...normalized,
+      id: appointmentId,
+      doctorId: doctorId ? String(doctorId) : '',
+      clinicId: clinicId ? String(clinicId) : '',
+      clinicName,
+      doctorName,
+      mobileNo: normalized.mobileNo || appointment.mobileNo1 || '',
+      date: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toLocaleDateString() : 'N/A',
+      dateValue: parsedDate && !Number.isNaN(parsedDate.getTime()) ? new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()) : null,
+      time: appointment.TimeSlot || appointment.AppointmentTime || appointment.appointmentTime || appointment.startTime || 'N/A',
+      status: normalizeAppointmentStatus(
+        appointment.status ?? appointment.Status ?? appointment.appointmentStatus ?? appointment.AppointmentStatus,
+        appointment.isPatientsConfirmed ?? appointment.IsPatientsConfirmed
+      ),
+    };
+  });
+
   // Client-side Filtering
-  const filteredAppointments = appointments.filter(apt => {
+  const filteredAppointments = normalizedAppointments.filter(apt => {
     // 1. Approval Filter
     if (approvalFilter !== 'all') {
-      const status = (apt.Status || apt.status || '').toLowerCase(); 
+      const status = apt.status;
       if (approvalFilter === 'approve' && status !== 'approved') return false;
       if (approvalFilter === 'reject' && status !== 'rejected') return false;
     }
@@ -170,32 +180,28 @@ export default function AllAppointmentsListPage() {
     // 2. Name Search
     if (visitorName) {
        const term = visitorName.toLowerCase();
-       const name = (apt.PatientName || apt.FirstName || apt.firstName || apt.name || '').toLowerCase();
-       const docName = (apt.DoctorName || apt.doctorName || '').toLowerCase();
+       const name = (apt.patientName || '').toLowerCase();
+       const docName = (apt.doctorName || '').toLowerCase();
        if (!name.includes(term) && !docName.includes(term)) return false;
     }
 
     // 3. Mobile Search
     if (mobileNo) {
        const term = String(mobileNo);
-       const mobile = String(apt.MobileNo || apt.PhoneNo || apt.mobile || apt.Mobile || '');
+       const mobile = String(apt.mobileNo || '');
        if (!mobile.includes(term)) return false;
     }
     
     // 4. Clinic Filter
     if (selectedClinic !== 'all') {
-        const clinic = (apt.ClinicName || apt.clinicName || '').toLowerCase();
+        const clinic = (apt.clinicName || '').toLowerCase();
         if (!clinic.includes(selectedClinic.toLowerCase())) return false;
     }
 
     // 5. Date Range Filter
     if (fromDate || toDate) {
-        const aptDateStr = apt.AppointmentDate || apt.appointmentDate || apt.startDate;
-        if (!aptDateStr) return false; 
-        
-        const aptDate = new Date(aptDateStr);
-        // Normalize time to 00:00:00 for accurate date comparison
-        const checkDate = new Date(aptDate.getFullYear(), aptDate.getMonth(), aptDate.getDate());
+        if (!apt.dateValue) return false; 
+        const checkDate = apt.dateValue;
 
         if (fromDate) {
             const fDate = new Date(fromDate);
@@ -223,17 +229,6 @@ export default function AllAppointmentsListPage() {
     setCurrentPage(pageNumber);
   };
   
-  // Transform Data for Table Display
-  // Adjust keys based on actual API response structure (checking both Pascal and camelCase)
-  const displayItems = currentItems.map(apt => ({
-      id: apt.AppointmentID || apt.appointmentId || apt.id,
-      name: `${apt.FirstName || apt.firstName || ''} ${apt.LastName || apt.lastName || ''}`.trim() || apt.PatientName || 'N/A',
-      doctorName: apt.DoctorName || apt.doctorName || (apt.doctorID ? `Dr. ID ${apt.doctorID}` : 'N/A'),
-      date: (apt.AppointmentDate || apt.appointmentDate || apt.startDate) ? new Date(apt.AppointmentDate || apt.appointmentDate || apt.startDate).toLocaleDateString() : 'N/A',
-      time: apt.TimeSlot || apt.AppointmentTime || apt.appointmentTime || apt.startTime || 'N/A',
-      status: String(apt.Status || apt.status || (apt.isActive ? 'Active' : 'Inactive')).toLowerCase()
-  }));
-
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-[#18122B] pb-8 transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6">
@@ -390,7 +385,12 @@ export default function AllAppointmentsListPage() {
                 {/* Appointments Table */}
                 <TableWrapper>
                     {loading ? (
-                        <div className="p-8 text-center text-muted-foreground">Loading appointments...</div>
+                        <div className="p-8 text-center text-muted-foreground">
+                          <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
+                          Loading appointments...
+                        </div>
+                    ) : error ? (
+                        <div className="p-8 text-center text-red-500">{error}</div>
                     ) : (
                     <table className="w-full">
                     <thead>
@@ -405,14 +405,14 @@ export default function AllAppointmentsListPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {displayItems.length > 0 ? (
-                            displayItems.map((appointment, index) => (
+                        {currentItems.length > 0 ? (
+                            currentItems.map((appointment, index) => (
                         <tr
                             key={appointment.id || index}
                             className="border-t border-gray-200 dark:border-[#443C68]/50 hover:bg-gray-50 dark:bg-[#18122B] dark:hover:bg-[#393053] transition-colors"
                         >
                             <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{indexOfFirstItem + index + 1}</td>
-                            <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{appointment.name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{appointment.patientName || 'N/A'}</td>
                             <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{appointment.doctorName}</td>
                             <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{appointment.date}</td>
                             <td className="px-4 py-3 text-sm text-gray-800 dark:text-white/90">{appointment.time}</td>

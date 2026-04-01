@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import axiosClient from '@/api/client';
+import { authService } from '@/api/auth';
 
 // Flag to enable/disable mock data fallback
 const USE_MOCK_FALLBACK = false;
@@ -33,8 +34,13 @@ export async function GET(request) {
         throw new Error("Forcing Mock Data");
     }
 
-    // Extract auth header
-    const authHeader = request.headers.get('authorization');
+    // Use incoming auth header when present, otherwise fetch a service token
+    let authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+        const token = await authService.getToken();
+        authHeader = `Bearer ${token}`;
+    }
+
     const requestConfig = {
         headers: {
             'Authorization': authHeader

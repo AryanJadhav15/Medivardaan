@@ -122,6 +122,22 @@ export default function AddLeadFormPage() {
   const handleInputChange = (field, value) => {
     if (isViewMode) return; 
 
+    if (field === "dateOfBirth") {
+      let calculatedAge = formData.age;
+      if (value) {
+        const birthDate = new Date(value);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        calculatedAge = age >= 0 ? age.toString() : "";
+      }
+      setFormData((prev) => ({ ...prev, dateOfBirth: value, age: calculatedAge }));
+      return;
+    }
+
     if (field === "mobileNo1" || field === "mobileNo2") {
       const numericValue = value.replace(/\D/g, "");
       if (numericValue.length > 10) return;
@@ -381,7 +397,7 @@ export default function AddLeadFormPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="age">Age</Label>
-                <Input id="age" type="number" placeholder="Enter Age" value={formData.age} onChange={(e) => handleInputChange("age", e.target.value)} className="w-full h-10" />
+                <Input id="age" type="number" value={formData.age} onChange={(e) => handleInputChange("age", e.target.value)} className="w-full h-10" />
               </div>
             </div>
 

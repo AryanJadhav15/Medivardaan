@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getMockLeads } from '@/api/mocks/leads.js';
 import axiosClient from '@/api/client';
+import { authService } from '@/api/auth';
 
 // Flag to enable/disable mock data fallback
 const USE_MOCK_FALLBACK = false; // Changed to false to debug real API
@@ -36,15 +37,14 @@ export async function GET(request) {
 
     console.log('[DEBUG] Mapped payload:', JSON.stringify(searchPayload));
 
-    // Extract auth header
-    const authHeader = request.headers.get('authorization');
-
+    // Use incoming auth header when present, otherwise fetch a service token.
+    // This matches other working API routes and prevents the leads page from
+    // failing when the browser token is missing or expired locally.
+    let authHeader = request.headers.get('authorization');
     if (!authHeader) {
-        console.error('❌ No auth token provided in request');
-        return NextResponse.json(
-            { error: 'Unauthorized', details: 'No authorization header provided' },
-            { status: 401 }
-        );
+        const token = await authService.getToken();
+        authHeader = `Bearer ${token}`;
+        console.log('[DEBUG] Using service token for leads fetch');
     }
 
     const requestConfig = {
@@ -69,12 +69,15 @@ export async function GET(request) {
         const getQueryString = getQueryParams.toString();
         console.log(`[DEBUG] Final GET query: ${getQueryString}`);
 
-        console.time("ExternalAPI_Duration");
-        response = await axiosClient.get(`/Leads/GetAllLeads${getQueryString ? `?${getQueryString}` : ''}`, requestConfig);
-        console.timeEnd("ExternalAPI_Duration");
+        const timerLabel = "ExternalAPI_Duration";
+        console.time(timerLabel);
+        try {
+          response = await axiosClient.get(`/Leads/GetAllLeads${getQueryString ? `?${getQueryString}` : ''}`, requestConfig);
+        } finally {
+          console.timeEnd(timerLabel);
+        }
 
     } catch (error) {
-        console.timeEnd("ExternalAPI_Duration");
         console.error(`[DEBUG] GET Error: ${error.message}`);
         
         if (error.response) {

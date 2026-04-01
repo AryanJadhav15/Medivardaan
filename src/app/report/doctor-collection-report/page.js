@@ -63,9 +63,12 @@ export default function DoctorCollectionReportPage() {
     exportToExcel(reportData, "Doctor_Collection_Report");
   };
 
+  // Unique clinic names derived from the fetched data for the dropdown
+  const uniqueClinicNames = [...new Set(reportData.map((item) => item.clinic).filter(Boolean))].sort();
+
   // Filter Data (date filtering is done server-side via the Search button)
   const filteredData = reportData.filter((item) => {
-    const matchesClinic = !clinic || clinic === "all" || item.clinic.toLowerCase().includes(clinic.toLowerCase());
+    const matchesClinic = !clinic || clinic === "all" || item.clinic === clinic;
     const matchesDoctor = item.doctor.toLowerCase().includes(doctorName.toLowerCase());
     return matchesClinic && matchesDoctor;
   });
@@ -100,8 +103,9 @@ export default function DoctorCollectionReportPage() {
                     </SelectTrigger>
                     <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="dadar">DADAR West</SelectItem>
-                    <SelectItem value="malad">MALAD West</SelectItem>
+                    {uniqueClinicNames.map((name) => (
+                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                    ))}
                     </SelectContent>
                 </Select>
             </div>

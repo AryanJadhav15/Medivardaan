@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Settings, FileSpreadsheet, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,43 +21,53 @@ import {
 } from "@/components/ui/table";
 import { exportToExcel } from "@/utils/exportToExcel";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { getDoctorCollectionReport } from "@/api/reports";
 
 export default function DoctorCollectionReportPage() {
   const [clinic, setClinic] = useState("");
   const [doctorName, setDoctorName] = useState("");
-  const [fromDate, setFromDate] = useState("2024-12-08"); // Set default to realistic date
-  const [toDate, setToDate] = useState("2025-12-23");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
 
-  // Mock data matching the image
-  const [reportData, setReportData] = useState([
-    { id: 1, clinic: "DADAR West", doctor: "Dr.Harshada Mane", treatmentAmount: "1025000.00", medicineAmount: "0.00", date: "2025-12-10" },
-    { id: 2, clinic: "MALAD West", doctor: "Dr.Swapnali Nachnekar", treatmentAmount: "66173.00", medicineAmount: "1173.04", date: "2025-12-12" },
-    { id: 3, clinic: "ELECTRONIC CITY", doctor: "Dr.Shaheda Manjothi", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-15" },
-    { id: 4, clinic: "TRICHY", doctor: "Dr.SUVETHA ASHOK", treatmentAmount: "32500.00", medicineAmount: "0.00", date: "2025-12-18" },
-    { id: 5, clinic: "BTM", doctor: "Dr.Hajara V K", treatmentAmount: "16800.00", medicineAmount: "0.00", date: "2025-12-20" },
-    { id: 6, clinic: "Andheri East (takshila)", doctor: "Dr.A Samad Tanwar", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-21" },
-    { id: 7, clinic: "Andheri West (Juhu)", doctor: "Dr.A Samad Tanwar", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-21" },
-    { id: 8, clinic: "bandra west", doctor: "Dr.A Samad Tanwar", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-21" },
-    { id: 9, clinic: "Goregaon West", doctor: "Dr.A Samad Tanwar", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-21" },
-    { id: 10, clinic: "GOREGAON East", doctor: "Dr.A Samad Tanwar", treatmentAmount: "0.00", medicineAmount: "0.00", date: "2025-12-21" },
-  ]);
+  const [reportData, setReportData] = useState([]);
+
+  const fetchReport = async () => {
+    try {
+      setIsLoading(true);
+      setCurrentPage(1);
+      const data = await getDoctorCollectionReport(fromDate, toDate);
+      const responseArray = Array.isArray(data) ? data : [];
+      const mappedData = responseArray.map((item, index) => ({
+        id: index + 1,
+        clinic: item.clinicName || item.ClinicName || "N/A",
+        doctor: item.doctorName || item.DoctorName || "N/A",
+        treatmentAmount: item.treatmentPaidAmount ?? item.TreatmentPaidAmount ?? 0,
+        medicineAmount: item.medicinesPaidAmount ?? item.MedicinesPaidAmount ?? 0,
+      }));
+      setReportData(mappedData);
+    } catch (error) {
+      console.error("Failed to fetch doctor collection report:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReport();
+  }, []);
 
   const handleExport = () => {
     exportToExcel(reportData, "Doctor_Collection_Report");
   };
 
-  // Filter Data
+  // Filter Data (date filtering is done server-side via the Search button)
   const filteredData = reportData.filter((item) => {
-      const matchesClinic = !clinic || clinic === "all" || item.clinic.toLowerCase().includes(clinic.toLowerCase()); 
-      const matchesDoctor = item.doctor.toLowerCase().includes(doctorName.toLowerCase());
-      
-      let matchesDate = true;
-      if (fromDate) matchesDate = matchesDate && new Date(item.date) >= new Date(fromDate);
-      if (toDate) matchesDate = matchesDate && new Date(item.date) <= new Date(toDate);
-
-      return matchesClinic && matchesDoctor && matchesDate;
+    const matchesClinic = !clinic || clinic === "all" || item.clinic.toLowerCase().includes(clinic.toLowerCase());
+    const matchesDoctor = item.doctor.toLowerCase().includes(doctorName.toLowerCase());
+    return matchesClinic && matchesDoctor;
   });
 
   // Calculate Total
@@ -122,8 +132,8 @@ export default function DoctorCollectionReportPage() {
             className="bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 w-full md:w-auto"
           />
 
-          <Button className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium shadow-sm transition-all md:w-auto w-full">
-            Search
+          <Button onClick={fetchReport} disabled={isLoading} className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium shadow-sm transition-all md:w-auto w-full">
+            {isLoading ? "Loading..." : "Search"}
           </Button>
 
           <div className="ml-auto text-sm font-medium text-gray-700 dark:text-white/75">
@@ -145,19 +155,24 @@ export default function DoctorCollectionReportPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.map((item, index) => (
-              <TableRow key={item.id} >
-                <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell className="dark:text-white/75">{item.clinic}</TableCell>
-                <TableCell className="dark:text-white/75">{item.doctor}</TableCell>
-                <TableCell className="dark:text-white/75">{item.treatmentAmount}</TableCell>
-                <TableCell className="dark:text-white/75">{item.medicineAmount}</TableCell>
-              </TableRow>
-            ))}
-             {currentItems.length === 0 && (
+            {isLoading ? (
               <TableRow>
-                 <TableCell colSpan={5} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
+                <TableCell colSpan={5} className="text-center py-8 text-gray-500 dark:text-white/50">Loading report data...</TableCell>
               </TableRow>
+            ) : currentItems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-gray-500 dark:text-white/50">No matching records found</TableCell>
+              </TableRow>
+            ) : (
+              currentItems.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
+                  <TableCell className="dark:text-white/75">{item.clinic}</TableCell>
+                  <TableCell className="dark:text-white/75">{item.doctor}</TableCell>
+                  <TableCell className="dark:text-white/75">{item.treatmentAmount}</TableCell>
+                  <TableCell className="dark:text-white/75">{item.medicineAmount}</TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>

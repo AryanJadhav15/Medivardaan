@@ -93,7 +93,7 @@ export default function ContactDetailsPage() {
         <Button
           onClick={handleSearch}
           disabled={isLoading}
-          className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium transition-all w-full md:w-auto"
+          className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm px-8 font-medium transition-all w-full md:w-auto"
         >
           {isLoading ? "Loading..." : "Search"}
         </Button>

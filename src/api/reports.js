@@ -99,6 +99,38 @@ export const getContactDetails = async ({ PageNumber = 1, PageSize = 10, Name = 
   return response.json();
 };
 
+export const getDoctorAttendanceReport = async ({ FromDate, ToDate, ClinicName = "" } = {}) => {
+  let authHeader = "";
+  if (typeof window !== "undefined" && window.localStorage) {
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("jwt_token");
+    if (token) authHeader = `Bearer ${token}`;
+  }
+
+  const params = new URLSearchParams();
+  if (FromDate) params.append("FromDate", FromDate);
+  if (ToDate) params.append("ToDate", ToDate);
+  if (ClinicName) params.append("ClinicName", ClinicName);
+
+  const response = await fetch(`/api/Report/GetDoctorAttendanceReport?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(authHeader && { Authorization: authHeader }),
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`,
+    );
+  }
+
+  return response.json();
+};
+
 // Backward compatibility
 export const reportsService = {
   getPatientWiseReport,
@@ -107,4 +139,5 @@ export const reportsService = {
   getPatientReport,
   getDoctorCollectionReport,
   getContactDetails,
+  getDoctorAttendanceReport,
 };

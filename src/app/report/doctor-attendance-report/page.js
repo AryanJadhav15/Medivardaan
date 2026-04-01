@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Settings, FileSpreadsheet } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Settings, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,43 +21,75 @@ import {
 } from "@/components/ui/table";
 import { exportToExcel } from "@/utils/exportToExcel";
 import CustomPagination from "@/components/ui/custom-pagination";
+import { reportsService } from "@/api/reports";
+import { toast } from "sonner";
 
 export default function DoctorAttendanceReportPage() {
-  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedOption, setSelectedOption] = useState("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [reportData, setReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
 
-  // Mock data matching the image
-  const [reportData, setReportData] = useState([
-    { id: 1, doctor: "Dr.Sabeena Khan", clinic: "Clinic A", date: "2021-05-26", inTime: "10:39 AM", outTime: "" },
-    { id: 2, doctor: "Dr.SHRADDHA KAMBALE", clinic: "Clinic B", date: "2021-01-04", inTime: "07:47 PM", outTime: "" },
-    { id: 3, doctor: "Dr.SHRADDHA KAMBALE", clinic: "Clinic B", date: "2020-10-30", inTime: "11:32 AM", outTime: "" },
-    { id: 4, doctor: "Dr.Jahnavi Patel", clinic: "Clinic A", date: "2021-01-04", inTime: "09:51 AM", outTime: "" },
-    { id: 5, doctor: "Dr.Jahnavi Patel", clinic: "Clinic A", date: "2021-01-04", inTime: "09:51 AM", outTime: "" },
-    { id: 6, doctor: "Dr.Jahnavi Patel", clinic: "Clinic A", date: "2021-01-04", inTime: "09:51 AM", outTime: "" },
-    { id: 7, doctor: "Dr.ANGIE FERNANDES", clinic: "Clinic C", date: "2020-09-01", inTime: "11:00 AM", outTime: "" },
-    { id: 8, doctor: "Dr.ANGIE FERNANDES", clinic: "Clinic C", date: "2020-09-10", inTime: "11:04 AM", outTime: "" },
-    { id: 9, doctor: "Dr.isha jain", clinic: "Clinic A", date: "2021-01-02", inTime: "10:48 AM", outTime: "" },
-    { id: 10, doctor: "Dr.isha jain", clinic: "Clinic A", date: "2020-12-29", inTime: "01:50 PM", outTime: "" },
-  ]);
+  const fetchReportData = async () => {
+    try {
+      setLoading(true);
+      const data = await reportsService.getDoctorAttendanceReport({
+        FromDate: fromDate,
+        ToDate: toDate,
+      });
+      if (Array.isArray(data)) {
+        setReportData(data);
+      } else if (data && Array.isArray(data.data)) {
+        setReportData(data.data);
+      } else if (data && Array.isArray(data.Data)) {
+        setReportData(data.Data);
+      } else {
+        setReportData([]);
+      }
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching doctor attendance report:", error);
+      toast.error(error.message || "Failed to fetch report data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-   const handleExport = () => {
+  useEffect(() => {
+    fetchReportData();
+  }, []);
+
+  const handleExport = () => {
     exportToExcel(reportData, "Doctor_Attendance_Report");
   };
 
+  // Safe getter functions to handle potential API field name variations
+  const getDoctorName = (item) => item.doctor || item.doctorName || item.DoctorName || item.strDoctorName || "-";
+  const getClinicName = (item) => item.clinic || item.clinicName || item.ClinicName || item.strClinicName || "-";
+  const getDate = (item) => item.date || item.attendanceDate || item.AttendanceDate || item.dtDate || "-";
+  const getInTime = (item) => item.inTime || item.InTime || item.strInTime || "-";
+  const getOutTime = (item) => item.outTime || item.OutTime || item.strOutTime || "-";
+
   // Filter Data
   const filteredData = reportData.filter((item) => {
-      // Mocking 'selectedOption' as Clinic Filter for now since label was vague in original code
-      const matchesClinic = !selectedOption || item.clinic === selectedOption;
+      const clinicName = getClinicName(item);
+      const matchesClinic = selectedOption === "all" || !selectedOption || clinicName === selectedOption;
       
       let matchesDate = true;
-      if (fromDate) matchesDate = matchesDate && new Date(item.date) >= new Date(fromDate);
-      if (toDate) matchesDate = matchesDate && new Date(item.date) <= new Date(toDate);
+      const itemDateStr = getDate(item);
+      if (itemDateStr && itemDateStr !== "-") {
+        if (fromDate) matchesDate = matchesDate && new Date(itemDateStr) >= new Date(fromDate);
+        if (toDate) matchesDate = matchesDate && new Date(itemDateStr) <= new Date(toDate);
+      }
 
       return matchesClinic && matchesDate;
   });
+
+  // Extract distinct clinics for the select dropdown based on actual data
+  const distinctClinics = [...new Set(reportData.map(getClinicName).filter(c => c && c !== "-"))];
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -83,9 +115,10 @@ export default function DoctorAttendanceReportPage() {
                 <SelectValue placeholder="--- Select Clinic ---" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem value="Clinic A">Clinic A</SelectItem>
-                <SelectItem value="Clinic B">Clinic B</SelectItem>
-                 <SelectItem value="Clinic C">Clinic C</SelectItem>
+                <SelectItem value="all">All Clinics</SelectItem>
+                {distinctClinics.map((clinic, idx) => (
+                    <SelectItem key={idx} value={clinic}>{clinic}</SelectItem>
+                ))}
                 </SelectContent>
             </Select>
         </div>
@@ -112,7 +145,12 @@ export default function DoctorAttendanceReportPage() {
           />
         </div>
 
-        <Button className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium shadow-sm transition-all w-full md:w-auto">
+        <Button 
+            onClick={fetchReportData}
+            disabled={loading}
+            className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium w-full md:w-auto flex items-center gap-2"
+        >
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           Search
         </Button>
       </div>
@@ -136,17 +174,24 @@ export default function DoctorAttendanceReportPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.map((item, index) => (
-              <TableRow key={item.id} >
-                <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
-                <TableCell className="dark:text-white/75">{item.doctor}</TableCell>
-                <TableCell className="dark:text-white/75">{item.clinic}</TableCell>
-                <TableCell className="dark:text-white/75">{item.date}</TableCell>
-                <TableCell className="dark:text-white/75">{item.inTime}</TableCell>
-                <TableCell className="dark:text-white/75">{item.outTime}</TableCell>
-              </TableRow>
-            ))}
-             {currentItems.length === 0 && (
+            {loading ? (
+                <TableRow>
+                   <TableCell colSpan={6} className="text-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto text-medivardaan-teal" />
+                   </TableCell>
+                </TableRow>
+            ) : currentItems.length > 0 ? (
+                currentItems.map((item, index) => (
+                <TableRow key={item.id || index} >
+                    <TableCell className="dark:text-white/75">{indexOfFirstItem + index + 1}</TableCell>
+                    <TableCell className="dark:text-white/75">{getDoctorName(item)}</TableCell>
+                    <TableCell className="dark:text-white/75">{getClinicName(item)}</TableCell>
+                    <TableCell className="dark:text-white/75">{getDate(item)}</TableCell>
+                    <TableCell className="dark:text-white/75">{getInTime(item)}</TableCell>
+                    <TableCell className="dark:text-white/75">{getOutTime(item)}</TableCell>
+                </TableRow>
+                ))
+            ) : (
               <TableRow>
                  <TableCell colSpan={6} className="text-center py-4 text-gray-500 dark:text-white/50">No matching records found</TableCell>
               </TableRow>
@@ -163,12 +208,14 @@ export default function DoctorAttendanceReportPage() {
          </Button>
          
           {/* Pagination component */}
+          {filteredData.length > 0 && (
             <CustomPagination 
                 totalItems={filteredData.length} 
                 itemsPerPage={itemsPerPage} 
                 currentPage={currentPage} 
                 onPageChange={setCurrentPage} 
             />
+          )}
       </div>
     </div>
   );

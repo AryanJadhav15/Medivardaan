@@ -136,7 +136,7 @@ export default function DoctorCollectionReportPage() {
             className="bg-white dark:bg-[#393053] border-gray-300 dark:border-[#443C68]/50 w-full md:w-auto"
           />
 
-          <Button onClick={fetchReport} disabled={isLoading} className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white shadow-sm transition-colors px-8 font-medium shadow-sm transition-all md:w-auto w-full">
+          <Button onClick={fetchReport} disabled={isLoading} className="bg-primary hover:bg-[#0b5c7a] dark:bg-medivardaan-purple dark:hover:bg-[#786bb0] text-white transition-colors px-8 font-medium shadow-sm md:w-auto w-full">
             {isLoading ? "Loading..." : "Search"}
           </Button>
 

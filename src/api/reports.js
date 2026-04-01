@@ -40,11 +40,47 @@ export const getDoctorCollectionReport = async (FromDate, ToDate) => {
 
   let authHeader = "";
   if (typeof window !== "undefined" && window.localStorage) {
-    const token = localStorage.getItem("token") || localStorage.getItem("jwt_token");
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("jwt_token");
     if (token) authHeader = `Bearer ${token}`;
   }
 
-  const response = await fetch(`/api/Report/GetDoctorCollectionReport?${params.toString()}`, {
+  const response = await fetch(
+    `/api/Report/GetDoctorCollectionReport?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
+      },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`,
+    );
+  }
+
+  return response.json();
+};
+
+export const getContactDetails = async ({ PageNumber = 1, PageSize = 10, Name = "" } = {}) => {
+  let authHeader = "";
+  if (typeof window !== "undefined" && window.localStorage) {
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("jwt_token");
+    if (token) authHeader = `Bearer ${token}`;
+  }
+
+  const params = new URLSearchParams();
+  params.append("PageNumber", PageNumber);
+  params.append("PageSize", PageSize);
+  if (Name) params.append("Name", Name);
+
+  const response = await fetch(`/api/Report/GetContactDetails?${params.toString()}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -55,7 +91,9 @@ export const getDoctorCollectionReport = async (FromDate, ToDate) => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`,
+    );
   }
 
   return response.json();
@@ -68,4 +106,5 @@ export const reportsService = {
   getDateWiseReport,
   getPatientReport,
   getDoctorCollectionReport,
+  getContactDetails,
 };

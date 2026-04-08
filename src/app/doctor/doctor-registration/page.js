@@ -348,6 +348,16 @@ export default function DoctorRegistrationPage() {
   };
 
   const filteredDoctors = doctors
+    .map((doctor) => {
+      // Resolve clinicName from local clinics list since the API only returns clinicID
+      const matchedClinic = clinics.find(
+        (c) => String(c.clinicID || c.clinicId) === String(doctor.clinicID)
+      );
+      return {
+        ...doctor,
+        clinicName: matchedClinic ? (matchedClinic.clinicName || matchedClinic.name) : (doctor.clinicName || "Unknown"),
+      };
+    })
     .filter((doctor) => {
       const searchTerm = filters.doctorName ? filters.doctorName.toLowerCase() : "";
       

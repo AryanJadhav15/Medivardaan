@@ -264,7 +264,10 @@ export default function DoctorRegistrationPage() {
 
     mutation.mutate(dataForTransformer, {
       onSuccess: (data) => {
-        alert(`Doctor added successfully! Doctor ID: ${data.doctorID}`);
+        const isUpdate = formData.doctorID && formData.doctorID > 0;
+        let finalDoctorID = isUpdate ? formData.doctorID : "N/A";
+        const actionStr = isUpdate ? "updated" : "added";
+        alert(`Doctor ${actionStr} successfully!` + (finalDoctorID !== "N/A" ? ` Doctor ID: ${finalDoctorID}` : ""));
         refetch();
         setFormData({
           clinicID: "",
@@ -346,16 +349,19 @@ export default function DoctorRegistrationPage() {
 
   const filteredDoctors = doctors
     .filter((doctor) => {
-      const matchesName =
-        !filters.doctorName ||
-        doctor.name.toLowerCase().includes(filters.doctorName.toLowerCase());
-      const matchesMobile =
-        !filters.mobileNo || doctor.mobileNo.includes(filters.mobileNo);
-      const matchesID =
-        !filters.doctorID ||
-        (doctor.doctorID &&
-          doctor.doctorID.toString().includes(filters.doctorID));
-      return matchesName && matchesMobile && matchesID;
+      const searchTerm = filters.doctorName ? filters.doctorName.toLowerCase() : "";
+      
+      const matchesSearch =
+        !searchTerm ||
+        (doctor.name && doctor.name.toLowerCase().includes(searchTerm)) ||
+        (doctor.doctorID && doctor.doctorID.toString().includes(searchTerm)) ||
+        (doctor.mobileNo && doctor.mobileNo.includes(searchTerm));
+        
+      const matchesPanel = 
+        filters.panel === "all" || 
+        (doctor.clinicID && doctor.clinicID.toString() === filters.panel);
+
+      return matchesSearch && matchesPanel;
     })
     .sort((a, b) => (b.doctorID || 0) - (a.doctorID || 0));
 
@@ -929,7 +935,7 @@ export default function DoctorRegistrationPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search Doctor..."
+                  placeholder="Search Doctor by Name, ID, or Mobile..."
                   value={filters.doctorName}
                   onChange={(e) =>
                     handleFilterChange("doctorName", e.target.value)

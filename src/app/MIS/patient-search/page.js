@@ -20,6 +20,30 @@ import { TableWrapper } from "@/components/shared/TableWrapper";
 export default function PatientSearchPage() {
   const router = useRouter();
 
+  // Real clinic list sourced from the backend database (ClinicID → ClinicName)
+  const CLINICS = [
+    { id: 4,   name: "Andheri West (Juhu)" },
+    { id: 86,  name: "Andheri East (takshila)" },
+    { id: 45,  name: "Airoli" },
+    { id: 122, name: "Badlapur" },
+    { id: 1,   name: "Borivali" },
+    { id: 16,  name: "Chembur East" },
+    { id: 2,   name: "Dadar West" },
+    { id: 35,  name: "Dombivali East" },
+    { id: 6,   name: "Goregaon East" },
+    { id: 98,  name: "Goregaon West" },
+    { id: 128, name: "Gurgaon" },
+    { id: 44,  name: "Kalyan" },
+    { id: 39,  name: "Kharghar" },
+    { id: 15,  name: "Mulund" },
+    { id: 176, name: "Palava" },
+    { id: 113, name: "Pimpri" },
+    { id: 33,  name: "Thane West" },
+    { id: 18,  name: "Vile-Parle East" },
+    { id: 47,  name: "Vasai West" },
+    { id: 209, name: "Wadala" },
+  ];
+
   const [searchForm, setSearchForm] = useState({
     firstName: "",
     lastName: "",
@@ -29,7 +53,9 @@ export default function PatientSearchPage() {
     toDate: "",
   });
 
-  const [patientsList, setPatientsList] = useState([]);
+  const [allPatients, setAllPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  
   const [isLoading, setIsLoading] = useState(true);
 
   // Pagination State
@@ -37,37 +63,38 @@ export default function PatientSearchPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
 
+  // Fetch all patients on mount
   useEffect(() => {
-    fetchPatients(currentPage);
-  }, [currentPage]);
+    fetchAllPatients();
+  }, []);
 
-  const fetchPatients = async (page = currentPage) => {
+  const fetchAllPatients = async () => {
     try {
       setIsLoading(true);
 
       const queryParams = {
-        PageNumber: page,
-        PageSize: pageSize,
+        PageNumber: 1,
+        // Backend ignores filters, so we pull a large set to filter client-side
+        PageSize: 1000,
       };
 
-      // Add filters if present
-      if (searchForm.firstName) queryParams.FirstName = searchForm.firstName;
-      if (searchForm.lastName) queryParams.LastName = searchForm.lastName;
-      if (searchForm.mobileNo) queryParams.MobileNo = searchForm.mobileNo;
-      if (searchForm.clinic && searchForm.clinic !== "all")
-        queryParams.Clinic = searchForm.clinic;
-      if (searchForm.fromDate) queryParams.FromDate = searchForm.fromDate;
-      if (searchForm.toDate) queryParams.ToDate = searchForm.toDate;
-
       const data = await patientService.getAllPatients(queryParams);
+      let list = Array.isArray(data) ? data : data?.data || [];
 
-      const list = Array.isArray(data) ? data : data?.data || [];
+      // --- MOCK PERSISTENCE INTEGRATION ---
+      try {
+        const localData = localStorage.getItem('demo_new_patients');
+        if (localData) {
+          const localPatients = JSON.parse(localData);
+          list = [...localPatients, ...list];
+        }
+      } catch (err) {
+        console.error("Failed to parse local dummy patients", err);
+      }
 
-      setPatientsList(list);
-
-      // Heuristic: Set total items large to allow navigation, as API doesn't return total count
-      // mimicking "All Leads" behavior
-      setTotalItems(1000 * pageSize);
+      setAllPatients(list);
+      setFilteredPatients(list);
+      setTotalItems(list.length);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
     } finally {
@@ -75,12 +102,67 @@ export default function PatientSearchPage() {
     }
   };
 
+  // Perform client-side filtering whenever form values change
+  useEffect(() => {
+    let result = allPatients;
+
+    if (searchForm.firstName) {
+      const q = searchForm.firstName.toLowerCase();
+      result = result.filter((p) =>
+        (p.fristName || p.firstName || p.FirstName || "").toLowerCase().includes(q)
+      );
+    }
+    if (searchForm.lastName) {
+      const q = searchForm.lastName.toLowerCase();
+      result = result.filter((p) =>
+        (p.lastName || p.LastName || "").toLowerCase().includes(q)
+      );
+    }
+    if (searchForm.mobileNo) {
+      const q = searchForm.mobileNo;
+      result = result.filter((p) =>
+        String(p.mobile || p.mobileNo || p.MobileNo || "").includes(q)
+      );
+    }
+    if (searchForm.clinic && searchForm.clinic !== "all") {
+      result = result.filter((p) => String(p.clinicID) === searchForm.clinic);
+    }
+    if (searchForm.fromDate) {
+      const from = new Date(searchForm.fromDate).getTime();
+      result = result.filter((p) => {
+        const d = p.registrationDate || p.createdDate;
+        if (!d) return false;
+        return new Date(d).getTime() >= from;
+      });
+    }
+    if (searchForm.toDate) {
+      const to = new Date(searchForm.toDate).getTime();
+      result = result.filter((p) => {
+        const d = p.registrationDate || p.createdDate;
+        if (!d) return false;
+        // Include the full day
+        return new Date(d).getTime() <= to + 86400000;
+      });
+    }
+
+    setFilteredPatients(result);
+    setTotalItems(result.length);
+    setCurrentPage(1); // Optional: reset page on active filter changes
+  }, [searchForm, allPatients]);
+
+  const displayedPatients = filteredPatients.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   function handleSearchChange(e) {
     setSearchForm((s) => ({ ...s, [e.target.name]: e.target.value }));
   }
 
   function handleSearch() {
-    setCurrentPage(1); // will trigger useEffect
+    // Current pagination is reset dynamically in effect, 
+    // but a manually triggered re-fetch could also sit here
+    setCurrentPage(1);
   }
 
   function handleViewConsultation(patient) {
@@ -152,11 +234,11 @@ export default function PatientSearchPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Clinics</SelectItem>
-                    <SelectItem value="malad">MALAD West</SelectItem>
-                    <SelectItem value="ghodbunder">Ghodbunder road</SelectItem>
-                    <SelectItem value="jayanagar">JayaNagar</SelectItem>
-                    <SelectItem value="madhapur">MADHAPUR</SelectItem>
-                    <SelectItem value="aundh">Aundh</SelectItem>
+                    {CLINICS.map((clinic) => (
+                      <SelectItem key={clinic.id} value={String(clinic.id)}>
+                        {clinic.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -243,8 +325,8 @@ export default function PatientSearchPage() {
                           Loading...
                         </td>
                       </tr>
-                    ) : patientsList.length > 0 ? (
-                      patientsList.map((patient, index) => (
+                    ) : displayedPatients.length > 0 ? (
+                      displayedPatients.map((patient, index) => (
                         <tr
                           key={patient.id}
                           className="border-t border-gray-200 dark:border-[#443C68]/50 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"

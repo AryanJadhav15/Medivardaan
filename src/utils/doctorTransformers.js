@@ -65,7 +65,7 @@ export const transformFormDataToAPI = (formData) => {
     lastName: formData.lastName || "",
     middleName: "", 
     gender: formData.gender || "male",
-    dob: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : new Date("1990-01-01").toISOString(),
+    dob: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString().split('T')[0] : "1990-01-01",
     bloodGroup: formData.bloodGroup || "",
     title: formData.title || "Dr.",
 
@@ -107,7 +107,7 @@ export const transformFormDataToAPI = (formData) => {
     // Work Information
     inTime: formData.inTime ? (formData.inTime.includes(':') && formData.inTime.length === 5 ? `${formData.inTime}:00` : formData.inTime) : "09:00:00", 
     outTime: formData.outTime ? (formData.outTime.includes(':') && formData.outTime.length === 5 ? `${formData.outTime}:00` : formData.outTime) : "18:00:00", 
-    regDate: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString(), 
+    regDate: formData.date ? new Date(formData.date).toISOString().replace("Z", "") : new Date().toISOString().replace("Z", ""), 
     
     // User credentials (Todo: Should be dynamic)
     userName: formData.email || "", 
@@ -119,9 +119,9 @@ export const transformFormDataToAPI = (formData) => {
     isDeleted: false, 
     isExistUser: true, 
     isTermAccept: true, 
-    modifiedDate: new Date().toISOString(), 
+    modifiedDate: new Date().toISOString().replace("Z", ""), 
     modifiedBy: null,
-    createdDate: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString(), 
+    createdDate: formData.date ? new Date(formData.date).toISOString().replace("Z", "") : new Date().toISOString().replace("Z", ""), 
     otp: null,
   };
 

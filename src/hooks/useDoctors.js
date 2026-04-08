@@ -23,9 +23,11 @@ export const useDoctors = (filters = {}, options = {}) => {
 
       // Transform data for display
       if (Array.isArray(data)) {
-        return data.map((doctor, index) =>
+        let transformedData = data.map((doctor, index) =>
           transformAPIDoctorToDisplay({ ...doctor, srNo: index + 1 })
         );
+
+        return transformedData;
       }
 
       return [];

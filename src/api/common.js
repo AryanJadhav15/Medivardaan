@@ -27,26 +27,18 @@ export const getClinics = async () => {
  */
 export const getSpecialities = async () => {
     
-    try {
-        const response = await axiosClient.get("/api/Master/GetSpeciality");
-        return response;
-    } catch (error) {
-        console.warn("API /api/Master/GetSpeciality failed, using mock data.", error.message);
-    
-        return [
-            { id: 1, name: "General Dentist" },
-            { id: 2, name: "Orthodontics" },
-            { id: 3, name: "Periodontics" },
-            { id: 4, name: "Prosthodontics" },
-            { id: 5, name: "Endodontics" },
-            { id: 6, name: "Pedodontics" },
-            { id: 7, name: "Oral & Maxillofacial Surgery" },
-            { id: 8, name: "Oral Pathology" },
-            { id: 9, name: "Conservative Dentist" },
-            { id: 10, name: "Aesthetic Dentist" }
-        ];
-
-    }
+    return [
+        { id: 1, name: "General Dentist" },
+        { id: 2, name: "Orthodontics" },
+        { id: 3, name: "Periodontics" },
+        { id: 4, name: "Prosthodontics" },
+        { id: 5, name: "Endodontics" },
+        { id: 6, name: "Pedodontics" },
+        { id: 7, name: "Oral & Maxillofacial Surgery" },
+        { id: 8, name: "Oral Pathology" },
+        { id: 9, name: "Conservative Dentist" },
+        { id: 10, name: "Aesthetic Dentist" }
+    ];
 
 };
 
@@ -55,18 +47,11 @@ export const getSpecialities = async () => {
  * @returns {Promise<Array>} List of doctor types
  */
 export const getDoctorTypes = async () => {
-    try {
-        const response = await axiosClient.get("/api/Master/GetDoctorType");
-        return response;
-    } catch (error) {
-        console.warn("API /api/Master/GetDoctorType failed, using mock data.", error.message);
-
-        return [
-            { id: 1, name: "Full Time" },
-            { id: 2, name: "Part Time" },
-            { id: 3, name: "Visiting" }
-        ];
-    }
+    return [
+        { id: 1, name: "Full Time" },
+        { id: 2, name: "Part Time" },
+        { id: 3, name: "Visiting" }
+    ];
 };
 
 export const getCountries = async () => {

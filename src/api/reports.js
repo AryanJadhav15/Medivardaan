@@ -131,6 +131,42 @@ export const getDoctorAttendanceReport = async ({ FromDate, ToDate, ClinicName =
   return response.json();
 };
 
+export const getMedicinesCollectionReport = async ({ FromDate, ToDate, ClinicName = "", DoctorName = "", MedicineName = "", PageNumber = 1, PageSize = 10 } = {}) => {
+  let authHeader = "";
+  if (typeof window !== "undefined" && window.localStorage) {
+    const token =
+      localStorage.getItem("token") || localStorage.getItem("jwt_token");
+    if (token) authHeader = `Bearer ${token}`;
+  }
+
+  const params = new URLSearchParams();
+  if (FromDate) params.append("FromDate", FromDate);
+  if (ToDate) params.append("ToDate", ToDate);
+  if (ClinicName && ClinicName !== "all") params.append("ClinicName", ClinicName);
+  if (DoctorName) params.append("DoctorName", DoctorName);
+  if (MedicineName) params.append("MedicineName", MedicineName);
+  params.append("PageNumber", PageNumber);
+  params.append("PageSize", PageSize);
+
+  const response = await fetch(`/api/Report/GetMedicinesCollectionReport?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(authHeader && { Authorization: authHeader }),
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || `HTTP error! status: ${response.status}`,
+    );
+  }
+
+  return response.json();
+};
+
 // Backward compatibility
 export const reportsService = {
   getPatientWiseReport,
@@ -140,4 +176,5 @@ export const reportsService = {
   getDoctorCollectionReport,
   getContactDetails,
   getDoctorAttendanceReport,
+  getMedicinesCollectionReport,
 };

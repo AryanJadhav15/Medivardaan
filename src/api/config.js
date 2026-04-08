@@ -26,6 +26,11 @@ export const API_CONFIG = {
       ADD: "/Doctor/AddDoctor",
       DELETE: "/Doctor", // DELETE /Doctor/{id}
     },
+    PATIENT: {
+      GET_BY_ID: "/Patient/GetPatientById",
+      GET_ALL: "/Patient/GetAllPatients",
+      UPSERT: "/Patient/UpsertPatient", // Confirmed: https://bmetrics.in/APIDemo/api/Patient/UpsertPatient
+    },
   },
 
   // Feature Flags

@@ -1,38 +1,44 @@
 import axiosClient from "@/api/client";
 
+// NOTE: axiosClient interceptor already unwraps response.data,
+// so the result from axiosClient calls IS the data — return directly.
+
 export const patientService = {
-  // Get patient by ID
+  // Get patient by ID — proxy at /api/Patient/GetPatientById reads ?patientId= query param
   getPatientById: async (patientId) => {
-    // Local route expects patientId param
-    // Based on User feedback: path param approach
-    const response = await axiosClient.get(`/api/Patient/GetPatientById/${patientId}`);
-    return response.data;
+    const data = await axiosClient.get(`/api/Patient/GetPatientById`, {
+      params: { patientId },
+      baseURL: "",
+    });
+    return data;
   },
 
-  // Upsert patient (Create/Update)
+  // Upsert patient (Create/Update) — proxied to Patient/UpsertPatient
   upsertPatient: async (patientData) => {
-    const response = await axiosClient.post(`/api/Patient/Upsert`, patientData);
-    return response.data;
+    const data = await axiosClient.post(`/api/Patient/Upsert`, patientData, {
+      baseURL: "",
+    });
+    return data;
   },
 
   // Update patient details
   updatePatient: async (patientData) => {
-    const response = await axiosClient.put(`/api/Patient/UpdatePatient`, patientData);
-    return response.data;
+    const data = await axiosClient.put(`/api/Patient/UpdatePatient`, patientData);
+    return data;
   },
 
   // Create new patient
   createPatient: async (patientData) => {
-    const response = await axiosClient.post(`/api/Patient/CreatePatient`, patientData);
-    return response.data;
+    const data = await axiosClient.post(`/api/Patient/CreatePatient`, patientData);
+    return data;
   },
 
   // Search patients
   searchPatients: async (searchParams) => {
-    const response = await axiosClient.get(`/api/Patient/SearchPatients`, {
+    const data = await axiosClient.get(`/api/Patient/SearchPatients`, {
       params: searchParams,
     });
-    return response.data;
+    return data;
   },
 
   // Upload patient profile image
@@ -41,17 +47,17 @@ export const patientService = {
     formData.append("patientId", patientId);
     formData.append("image", imageFile);
 
-    const response = await axiosClient.post(`/api/Patient/UploadImage`, formData, {
+    const data = await axiosClient.post(`/api/Patient/UploadImage`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    return data;
   },
 
   // Get all patients
   getAllPatients: async () => {
-    const response = await axiosClient.get(`/api/Patient/GetAllPatients`);
-    return response.data;
+    const data = await axiosClient.get(`/api/Patient/GetAllPatients`);
+    return data;
   },
 };

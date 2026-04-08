@@ -135,7 +135,7 @@ export const getAppointmentsReport = async (params = {}) => {
     if (typeof window === 'undefined') return []; // Safety check for server-side
 
     const queryString = new URLSearchParams(params).toString();
-    const url = `/api/Appointments/getAppointments${queryString ? `?${queryString}` : ''}`;
+    const url = `/api/Appointment/GetAppointments${queryString ? `?${queryString}` : ''}`;
     
     // Auth header from local storage
     let headers = { 'Content-Type': 'application/json' };

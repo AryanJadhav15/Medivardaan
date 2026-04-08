@@ -38,18 +38,33 @@ export default function AllPatientListPage() {
 
       console.log("Fetched patients data:", data);
 
+      let apiPatients = [];
       if (Array.isArray(data)) {
-        setPatients(data);
+        apiPatients = data;
       } else if (data && Array.isArray(data.data)) {
         // Handle wrapped response (e.g. { data: [...], ... })
-        setPatients(data.data);
+        apiPatients = data.data;
       } else if (data && Array.isArray(data.result)) {
         // Handle another common wrapped response pattern
-        setPatients(data.result);
+        apiPatients = data.result;
       } else {
         console.warn("API returned empty or invalid data structure:", data);
-        setPatients([]);
       }
+
+      // --- MOCK PERSISTENCE INTEGRATION ---
+      // Read locally registered patients that the backend demo environment didn't persist
+      try {
+        const localData = localStorage.getItem('demo_new_patients');
+        if (localData) {
+          const localPatients = JSON.parse(localData);
+          // Prepend the local ones so they appear first!
+          apiPatients = [...localPatients, ...apiPatients];
+        }
+      } catch (err) {
+        console.error("Failed to parse local dummy patients", err);
+      }
+
+      setPatients(apiPatients);
     } catch (err) {
       console.error("Failed to fetch patients:", err);
       setError("Failed to load patients. Please try again later.");

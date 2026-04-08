@@ -12,30 +12,46 @@ export async function POST(request) {
     // Get authentication token
     const token = await authService.getToken();
 
-    // Target external API - guessing pattern matches Doctor (/DoctorRegistration/UpsertDoctor)
-    const url = `${BASE_URL}/PatientRegistration/UpsertPatient`;
-    
-    console.log('Upserting patient to:', url);
-    console.log('Payload:', JSON.stringify(patientData, null, 2));
+    // Confirmed endpoint: https://bmetrics.in/APIDemo/api/Patient/UpsertPatient
+    // Returns HTTP 204 No Content on success
+    const url = `${BASE_URL}/Patient/UpsertPatient`;
+
+    console.log('[Patient Upsert] Posting to:', url);
+    console.log('[Patient Upsert] Payload:', JSON.stringify(patientData, null, 2));
 
     const response = await axios.post(url, patientData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'accept': 'text/plain'
-      }
+        'accept': 'text/plain',
+      },
+      // Allow 204 No Content as a valid success response
+      validateStatus: (status) => status >= 200 && status < 300,
     });
+
+    console.log('[Patient Upsert] Success. Status:', response.status);
+
+    // 204 = No Content — return a success JSON to the frontend
+    if (response.status === 204 || !response.data) {
+      return NextResponse.json({ success: true, message: 'Patient registered successfully.' });
+    }
 
     return NextResponse.json(response.data);
   } catch (error) {
-    console.error('Error upserting patient:', error?.response?.data || error.message);
-    
+    const upstreamStatus = error?.response?.status;
+    const upstreamData = error?.response?.data;
+
+    console.error('[Patient Upsert] Error. Status:', upstreamStatus);
+    console.error('[Patient Upsert] Upstream response:', JSON.stringify(upstreamData, null, 2));
+    console.error('[Patient Upsert] Message:', error.message);
+
     return NextResponse.json(
       {
         error: 'Failed to upsert patient',
-        details: error?.response?.data || error.message
+        details: upstreamData || error.message,
       },
-      { status: error?.response?.status || 500 }
+      { status: upstreamStatus || 500 }
     );
   }
 }
+

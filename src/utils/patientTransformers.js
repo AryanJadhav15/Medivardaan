@@ -1,26 +1,38 @@
+/**
+ * Transform form data to the confirmed API contract for Patient/UpsertPatient
+ *
+ * Confirmed via direct curl testing (HTTP 204 = success):
+ * - Flat body (no wrapper object)
+ * - Age must be a STRING (e.g. "25"), not an integer
+ * - CreatedBy must be an INTEGER (user ID), not a string
+ * - Returns 204 No Content on success
+ */
 export const transformPatientFormDataToAPI = (formData) => {
+  // Build address string from parts, filtering out empty segments
+  const addressParts = [formData.flatHouseNo, formData.areaStreet, formData.landmark]
+    .filter(Boolean)
+    .join(", ");
+
   return {
-    PatientID: formData.patientID || 0,
-    ClinicID: formData.clinicID || 0, // Should be passed or retrieved
+    PatientID: formData.patientID || formData.patientNo || 0,
+    ClinicID: formData.clinicID || 0,
     ClinicName: formData.clinicName || "",
     FirstName: formData.firstName || "",
     LastName: formData.lastName || "",
     Email: formData.email || "",
     MobileNo: formData.mobileNo || "",
+    TelephoneNo: formData.telephoneNo || "",
     Gender: formData.gender || "",
     DOB: formData.dateOfBirth || null,
-    Age: formData.age ? parseInt(formData.age) : 0,
-    Address: formData.flatHouseNo ? `${formData.flatHouseNo}, ${formData.areaStreet}, ${formData.landmark}`.trim() : "",
+    Age: formData.age ? String(formData.age) : "",  // API requires Age as a STRING
+    Address: addressParts,
     City: formData.city || "",
     State: formData.state || "",
     Country: formData.country || "",
     BloodGroup: formData.bloodGroup || "",
     EnquirySource: formData.enquirySource || "",
     CasePaperNo: formData.casePaperNo || "",
-    MedicalHistory: formData.medicalHistory ? JSON.stringify(formData.medicalHistory) : "",
-    DentalInfo: formData.dentalInfo ? JSON.stringify(formData.dentalInfo) : "",
-    // Add default fields if required by API
     IsActive: true,
-    CreatedBy: "System",
+    CreatedBy: 1,  // API requires CreatedBy as INTEGER (user ID)
   };
 };

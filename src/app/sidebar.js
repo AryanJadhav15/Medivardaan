@@ -267,6 +267,11 @@ export default function Sidebar({ open, onMenuClick }) {
         menuPath: "/patient/all-patient-list",
       },
       {
+        menuID: "patient-registration",
+        menuName: "Patient Registration",
+        menuPath: "/patient/registration",
+      },
+      {
         menuID: "patient-search",
         menuName: "Patient Search",
         menuPath: "/MIS/patient-search",

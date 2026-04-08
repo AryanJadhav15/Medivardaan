@@ -6,7 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Calendar, Check, X, Search, Filter } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
+import { useClinics } from "@/hooks/useMasterData"
+import { useDoctors } from "@/hooks/useDoctors"
 import { upsertAppointment } from "@/api/appointments";
 import { transformAppointmentFormData } from "@/utils/appointmentTransformers";
 
@@ -31,11 +40,16 @@ export default function BookAppointmentFormPage() {
     // format: HH:mm (required for input type="time")
   };
 
+  // Fetch master data
+  const { data: clinics = [], isLoading: isClinicsLoading } = useClinics();
+  const { data: doctors = [], isLoading: isDoctorsLoading } = useDoctors();
+
   // Form State
   const [formData, setFormData] = useState({
-    clinicName: paramClinic,
-    doctorName: paramDoctor,
+    clinicID: paramClinic,
+    doctorID: paramDoctor,
     patientName: "",
+    mobile: "",
     dob: "",
     age: "",
     appointmentDate: paramDate || getTodayDate(),
@@ -63,12 +77,17 @@ export default function BookAppointmentFormPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async () => {
     // Validate required fields
     if (
-      !formData.clinicName ||
-      !formData.doctorName ||
+      !formData.clinicID ||
+      !formData.doctorID ||
       !formData.patientName ||
+      !formData.mobile ||
       !formData.dob ||
       !formData.appointmentDate ||
       !formData.appointmentTime
@@ -119,29 +138,46 @@ export default function BookAppointmentFormPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="clinicName" className="text-muted-foreground">
-              Clinic Name <span className="text-red-500">*</span>
+            <Label htmlFor="clinicID" className="text-muted-foreground">
+              Clinic <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="clinicName"
-              name="clinicName"
-              value={formData.clinicName}
-              onChange={handleChange}
-              className="bg-background border-input"
-            />
+            <Select
+              name="clinicID"
+              value={formData.clinicID ? String(formData.clinicID) : undefined}
+              onValueChange={(value) => handleSelectChange('clinicID', value)}
+            >
+              <SelectTrigger className="bg-background border-input">
+                <SelectValue placeholder={isClinicsLoading ? "Loading..." : "Select clinic"} />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.isArray(clinics) && clinics.map((clinic) => (
+                  <SelectItem key={clinic.clinicID || clinic.clinicId || clinic.id} value={String(clinic.clinicID || clinic.clinicId || clinic.id)}>
+                    {clinic.clinicName || clinic.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="doctorName" className="text-muted-foreground">
-              Doctor Name <span className="text-red-500">*</span>
+            <Label htmlFor="doctorID" className="text-muted-foreground">
+              Doctor <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="doctorName"
-              name="doctorName"
-              placeholder="Enter doctor name"
-              value={formData.doctorName}
-              onChange={handleChange}
-              className="bg-background border-input"
-            />
+            <Select
+              name="doctorID"
+              value={formData.doctorID ? String(formData.doctorID) : undefined}
+              onValueChange={(value) => handleSelectChange('doctorID', value)}
+            >
+              <SelectTrigger className="bg-background border-input">
+                <SelectValue placeholder={isDoctorsLoading ? "Loading..." : "Select doctor"} />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.isArray(doctors) && doctors.map((doc) => (
+                  <SelectItem key={doc.doctorID || doc.DoctorID} value={String(doc.doctorID || doc.DoctorID)}>
+                    {doc.name || doc.doctorName || doc.firstName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -152,18 +188,34 @@ export default function BookAppointmentFormPage() {
           Patient Information
         </h2>
         <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="patientName" className="text-muted-foreground">
-              Patient Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="patientName"
-              name="patientName"
-              placeholder="Enter full name"
-              value={formData.patientName}
-              onChange={handleChange}
-              className="bg-background border-input"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="patientName" className="text-muted-foreground">
+                Patient Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="patientName"
+                name="patientName"
+                placeholder="Enter full name"
+                value={formData.patientName}
+                onChange={handleChange}
+                className="bg-background border-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mobile" className="text-muted-foreground">
+                Mobile Number <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="mobile"
+                name="mobile"
+                placeholder="Enter mobile number"
+                value={formData.mobile}
+                onChange={handleChange}
+                className="bg-background border-input"
+                maxLength={10}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

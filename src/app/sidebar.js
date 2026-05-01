@@ -1010,7 +1010,7 @@ export default function Sidebar({ open, onMenuClick }) {
         {open ? (
           <>
             <Image
-              src="/ortho-square-logo.png"
+              src="/medivardaan-logo-transparent-2.png"
               width={0}
               height={0}
               sizes="100vw"
@@ -1019,34 +1019,34 @@ export default function Sidebar({ open, onMenuClick }) {
               className="object-fill dark:hidden"
             />
             <Image
-              src="/ortho-square-dark-logo2.png"
+              src="/medivardaan-logo-transparent-2.png"
               width={0}
               height={0}
               sizes="100vw"
-              style={{ width: "110px", height: "70px" }}
+              style={{ width: "110px", height: "90px" }}
               alt="OrthoSquare Logo"
-              className="object-fill hidden dark:inline-block mb-3"
+              className="object-fill hidden dark:block dark:brightness-0 dark:invert dark:opacity-80"
             />
           </>
         ) : (
           <>
             <Image
-              src="/ortho-square-logo.png"
+              src="/medivardaan-logo-transparent-2.png"
               width={0}
               height={0}
               sizes="100vw"
               style={{ width: "auto", height: "65px" }}
-              alt="OrthoSquare Logo"
+              alt="Medivardaan Logo"
               className="object-contain dark:hidden"
             />
             <Image
-              src="/ortho-square-dark-logo2.png"
+              src="/medivardaan-logo-transparent-2.png"
               width={0}
               height={0}
               sizes="100vw"
-              style={{ width: "auto", height: "75px" }}
-              alt="OrthoSquare Logo"
-              className="object-contain hidden dark:block dark:opacity-80"
+              style={{ width: "auto", height: "65px" }}
+              alt="Medivardaan Logo"
+              className="object-contain hidden dark:block dark:brightness-0 dark:invert dark:opacity-80"
             />
           </>
         )}

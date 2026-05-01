@@ -115,7 +115,7 @@ export default function LoginPage() {
                         <div className="relative group">
                             <div className="absolute bg-gradient-to-r from-medivardaan-teal to-medivardaan-blue rounded-full blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
                             <Image
-                                src="/ortho-square-logo.png"
+                                src="/medivardaan-logo-transparent-2.png"
                                 width={150}
                                 height={100}
                                 alt="MediVardaan Logo"
@@ -123,7 +123,7 @@ export default function LoginPage() {
                             />
 
                             <Image
-                                src="/ortho-square-dark-logo.png"
+                                src="medivardaan-logo-transparent-2.png"
                                 width={280}
                                 height={200}
                                 alt="MediVardaan Logo"

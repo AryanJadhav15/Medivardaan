@@ -123,11 +123,11 @@ export default function LoginPage() {
                             />
 
                             <Image
-                                src="medivardaan-logo-transparent-2.png"
-                                width={280}
-                                height={200}
+                                src="/medivardaan-logo-transparent-2.png"
+                                width={150}
+                                height={100}
                                 alt="MediVardaan Logo"
-                                className="hidden relative object-fit rounded-2xl dark:inline-block"
+                                className="hidden relative object-fit rounded-2xl dark:inline-block dark:invert dark:brightness-0 dark:opacity-80"
                             />
                         </div>
                         <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medivardaan-teal to-medivardaan-blue bg-clip-text text-transparent">
